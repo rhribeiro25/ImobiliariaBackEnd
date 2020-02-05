@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-var Schema = mongoose.Aggregate.Schema;
+var Schema = mongoose.Schema;
 
 var documentSchema = new Schema({
     type: typeDocument,
@@ -8,4 +8,4 @@ var documentSchema = new Schema({
     dueDate: Date
 }, { versionKey: false });
 
-mongoose.exports = mongoose.model("Document", documentSchema);
+module.exports = mongoose.model("Document", documentSchema);

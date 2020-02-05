@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-var Schema = mongoose.Aggregate.Schema;
+var Schema = mongoose.Schema;
 
 var phoneNumberSchema = new Schema({
     street: String,
@@ -10,4 +10,4 @@ var phoneNumberSchema = new Schema({
     complement: String
 }, { versionKey: false });
 
-mongoose.exports = mongoose.model("PhoneNumber", phoneNumberSchema);
+module.exports = mongoose.model("PhoneNumber", phoneNumberSchema);

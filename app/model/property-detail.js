@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-var Schema = mongoose.Aggregate.Schema;
+var Schema = mongoose.Schema;
 
 var propertyDetailSchema = new Schema({
 
@@ -84,4 +84,4 @@ var propertyDetailSchema = new Schema({
 
 }, { versionKey: false });
 
-mongoose.exports = mongoose.model("PropertyDetail", propertyDetailSchema);
+module.exports = mongoose.model("PropertyDetail", propertyDetailSchema);

@@ -1,16 +1,16 @@
 var mongoose = require('mongoose');
-var Schema = mongoose.Aggregate.Schema;
+var Schema = mongoose.Schema;
 
 var personSchema = new Schema({
-    type: TypePerson,
+    //type: {type: mongoose.Schema.Types.ObjectId, ref: "TypePerson"},
     firstName: String,
     lastName: String,
     birthday: Date,
     motherName: String,
     fatherName: String,
-    documents: [{type: mongoose.Schema.Types.ObjectId, ref: "Document"}],
-    addresses: [{type: mongoose.Schema.Types.ObjectId, ref: "Address"}],
-    phoneNumbers: [{type: mongoose.Schema.Types.ObjectId, ref: "PhoneNumber"}]
+    //documents: [{type: mongoose.Schema.Types.ObjectId, ref: "Document"}],
+    //addresses: [{type: mongoose.Schema.Types.ObjectId, ref: "Address"}],
+    //phoneNumbers: [{type: mongoose.Schema.Types.ObjectId, ref: "PhoneNumber"}]
 }, { versionKey: false });
 
-mongoose.exports = mongoose.model("Person", personSchema);
+module.exports = mongoose.model("Person", personSchema);

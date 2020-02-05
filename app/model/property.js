@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-var Schema = mongoose.Aggregate.Schema;
+var Schema = mongoose.Schema;
 
 var propertySchema = new Schema({
     detail: PropertyDetail,
@@ -8,4 +8,4 @@ var propertySchema = new Schema({
     images: [{type: mongoose.Schema.Types.ObjectId, ref: "Image"}]
 }, { versionKey: false });
 
-mongoose.exports = mongoose.model("Property", propertySchema);
+module.exports = mongoose.model("Property", propertySchema);
