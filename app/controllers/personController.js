@@ -1,29 +1,26 @@
 const express = require('express');
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const authConfig = require("../config/auth")
+const authMiddleware = require("../middlewares/auth")
 const Person = require('../models/person');
 const router = express.Router();
+router.use(authMiddleware);
 
+function generateToken(params = {}){
+    return jwt.sign(params, authConfig.secret, {expiresIn: 86400});
+}
 
 router.post('/create', async (req, res) => {
-
-    console.log(req.body);
     try{
+        if(await Person.findOne({ email: req.body.email }))
+            return res.status(404).send({ error: "Person already exists!" });
         const person = await Person.create(req.body);
-        return res.send(person);
+        person.password = undefined;
+        return res.status(201).send({ person, token: generateToken({ id: person.id }) });
     } catch(err){
-        return res.status(400);
+        return res.status(500).send({ error: "Person creation failed!" });
     }
-
-
-
-    // const p = new Person(req.body);
-    // console.log(person);
-    // p.save((err, person) => {
-    //     if (err)
-    //         res.status(500).send(err);
-    //     else
-    //         res.status(200).send(person);
-    // })
 });
 
 router.get('/', async (req, res) => {
@@ -85,18 +82,18 @@ router.put('/:id', async (req, res) => {
     })
 });
 
-// router.post("/authenticate", async (req, res) => {
-//     const { email, password } = req.body;
-//     const user = await Person.findOne({ email }).select("+password");
-//     if(!user)
-//         return res.status(400).send({ error: "User not found" });
+router.post("/authenticate", async (req, res) => {
+    const { email, password } = req.body;
+    const person = await Person.findOne({ email }).select("+password");
 
-//     if(!await bcrypt.compare(password, user.password))
-//         return res.status(400).send({ error: "Invalid password" });
+    if(!person)
+        return res.status(404).send({ error: "User not found!" });
 
-//     user.password = undefined;
+    if(!await bcrypt.compare(password, person.password))
+        return res.status(404).send({ error: "Invalid password!" });
 
-//     res.send({ user });
-// });
+    person.password = undefined;
+    res.status(200 ).send({ person, token: generateToken({ id: person.id }) });
+});
 
 module.exports = app => app.use('/people', router);

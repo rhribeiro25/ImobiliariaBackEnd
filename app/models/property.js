@@ -6,6 +6,6 @@ const propertySchema = new Schema({
     address: {type: Schema.Types.ObjectId, ref: "Address"},
     valueLocation: Number,
     images: [{type: mongoose.Schema.Types.ObjectId, ref: "Image"}]
-}, { collection: 'properties' }, { versionKey: false });
+}, { versionKey: false });
 
 module.exports = mongoose.model("Property", propertySchema);

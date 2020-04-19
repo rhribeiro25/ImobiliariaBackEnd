@@ -10,6 +10,6 @@ const addressSchema = new Schema({
     cep: String,
     complement: String,
     state: String
-}, { collection: 'addresses' }, { versionKey: false });
+}, { versionKey: false });
 
 module.exports = mongoose.model("Address", addressSchema);

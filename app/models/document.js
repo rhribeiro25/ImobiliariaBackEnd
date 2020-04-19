@@ -6,6 +6,6 @@ const documentSchema = new Schema({
     digit: String,
     shippingDate: Date,
     dueDate: Date
-}, { collection: 'documents' }, { versionKey: false });
+}, { versionKey: false });
 
 module.exports = mongoose.model("Document", documentSchema);

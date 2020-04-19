@@ -1,12 +1,12 @@
 const mongoose = require('../database');
-// const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const Schema = mongoose.Schema;
 
 const personSchema = new Schema({
     typePerson: {
         type: String,
         required: true,
-        enum: ["LOCATOR", "TENANT", "WITNESS"]
+        enum: ["LOCATOR", "TENANT", "WITNESS", "USER"]
     },
     firstName: {
         type: String,
@@ -16,12 +16,12 @@ const personSchema = new Schema({
         type: String,
         required: true
     },
-    imgPerfil: {
-        imgName: {
+    image: {
+        name: {
             type: String,
             required: true
         },
-        imgPath: {
+        path: {
             type: String,
             required: true
         }
@@ -30,21 +30,22 @@ const personSchema = new Schema({
         type: String
     },
     motherName: {
-        type: String,
-        required: true
+        type: String
     },
     fatherName: {
         type: String
     },
     email: {
         type: String,
-        required: true
-        // unique: true
+        unique: true
     },
     password: {
         type: String,
-        required: true,
         select: false
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
     },
     documents: [{
         typeDoc: {
@@ -112,12 +113,12 @@ const personSchema = new Schema({
             required: false
         }
     }]
-}, { collection: 'people' }, { versionKey: false });
+}, { versionKey: false });
 
-// personSchema.pre("save", async function(next) {
-//     const hash = await bcrypt.hash(this.password, 10);
-//     this.password = hash;
-//     next();
-// });
+personSchema.pre("save", async function(next) {
+    const hash = await bcrypt.hash(this.password, 10);
+    this.password = hash;
+    next();
+});
 
 module.exports = mongoose.model("Person", personSchema);

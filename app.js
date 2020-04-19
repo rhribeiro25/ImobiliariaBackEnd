@@ -6,6 +6,6 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
-require('./app/controllers/person_controller')(app);
+require('./app/controllers/personController')(app);
 
 app.listen(3000);

@@ -81,6 +81,6 @@ const propertyDetailSchema = new Schema({
     machine_washes_and_dries: Boolean,
     dryer: Boolean,
 
-}, { collection: 'propertyDetails' }, { versionKey: false });
+}, { versionKey: false });
 
 module.exports = mongoose.model("PropertyDetail", propertyDetailSchema);
