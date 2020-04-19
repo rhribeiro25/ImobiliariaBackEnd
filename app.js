@@ -1,16 +1,11 @@
 const express = require('express');
-const bodyparser = require('body-parser');
-const cors = require('cors');
-const mongoose = require('mongoose');
-const person_controller = require('./app/controller/person_controller');
+const bodyParser = require('body-parser');
+
 const app = express();
 
-app.use(bodyparser.json());
-app.use(bodyparser.urlencoded({extended: true}));
-app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: false}));
 
-mongoose.connect('mongodb://localhost:27017/http_app', {useNewUrlParser: true});
-app.use('/people', person_controller);
-//app.use('/properties', property_controller);
+require('./app/controllers/person_controller')(app);
 
 app.listen(3000);

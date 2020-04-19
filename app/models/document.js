@@ -1,11 +1,11 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var documentSchema = new Schema({
-    type: typeDocument,
+const documentSchema = new Schema({
+    typeDoc: String,
     digit: String,
     shippingDate: Date,
     dueDate: Date
-}, { versionKey: false });
+}, { collection: 'documents' }, { versionKey: false });
 
 module.exports = mongoose.model("Document", documentSchema);

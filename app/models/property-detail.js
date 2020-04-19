@@ -1,8 +1,7 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var propertyDetailSchema = new Schema({
-
+const propertyDetailSchema = new Schema({
     /* GENERAL */
     area: Number,
     bedrooms: Number,
@@ -82,6 +81,6 @@ var propertyDetailSchema = new Schema({
     machine_washes_and_dries: Boolean,
     dryer: Boolean,
 
-}, { versionKey: false });
+}, { collection: 'propertyDetails' }, { versionKey: false });
 
 module.exports = mongoose.model("PropertyDetail", propertyDetailSchema);

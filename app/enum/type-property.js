@@ -4,5 +4,3 @@ const typeProperty = {
   HOUSE: "Casa",
   CONDOMINIUM_HOUSE: "Casa de Condomínio"
 };
-
-module.exports = mongoose.model("TypeProperty", typeProperty);

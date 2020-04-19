@@ -4,5 +4,3 @@ const typeDocument = {
     CNPJ: "CNPJ",
     PASSPORT: "Passaporte"
 };
-
-module.exports = mongoose.model("TypeDocument", typeDocument);
