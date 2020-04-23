@@ -1,12 +1,12 @@
-const mongoose = require('../database');
+const mongoose = require('../../database');
 const bcrypt = require("bcryptjs");
 const Schema = mongoose.Schema;
 
 const personSchema = new Schema({
-    typePerson: {
+    type: {
         type: String,
         required: true,
-        enum: ["LOCATOR", "TENANT", "WITNESS", "USER"]
+        enum: ["LOCATOR", "TENANT", "WITNESS", "USER", "ADMIN"]
     },
     firstName: {
         type: String,
@@ -36,10 +36,17 @@ const personSchema = new Schema({
         type: String
     },
     email: {
-        type: String,
-        unique: true
+        type: String
     },
     password: {
+        type: String,
+        select: false
+    },
+    passwordResetToken: {
+        type: String,
+        select: false
+    },
+    passwordResetExpires: {
         type: String,
         select: false
     },
@@ -48,7 +55,7 @@ const personSchema = new Schema({
         default: Date.now
     },
     documents: [{
-        typeDoc: {
+        type: {
             type: String,
             required: true,
             enum: ["CPF", "IDENTITY", "CNPJ", "PASSPORT"]
@@ -64,8 +71,9 @@ const personSchema = new Schema({
             type: Date
         }
     }],
+    rent: Number,
     addresses: [{
-        typeAddress: {
+        type: {
             type: String,
             required: true,
             enum: ["OFFICIAL", "CORRESPONDENCE"]
@@ -99,7 +107,7 @@ const personSchema = new Schema({
         }
     }],
     phoneNumbers: [{
-        typePhone: {
+        type: {
             type: String,
             required: false,
             enum: ["CELLPHONE", "TELEPHONE", "FAX"]
@@ -112,7 +120,15 @@ const personSchema = new Schema({
             type: String,
             required: false
         }
-    }]
+    }],
+    contract: {
+        type: Schema.Types.ObjectId, 
+        ref: "Contract"
+    },
+    user: {
+        type: Schema.Types.ObjectId, 
+        ref: "Person"
+    }
 }, { versionKey: false });
 
 personSchema.pre("save", async function(next) {
