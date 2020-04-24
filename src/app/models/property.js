@@ -3,10 +3,10 @@ var Schema = mongoose.Schema;
 
 const propertySchema = new Schema({
     details: {
-        type: {
+        typeProperty: {
             type: String,
             required: true,
-            enum: ["APARTMENT", "KITNET", "HOUSE", "CONDOMINIUM_HOUSE"]
+            enum: [ "APARTMENT", "KITNET", "HOUSE", "CONDOMINIUM_HOUSE" ]
         },
         area: {
             type: Boolean,
@@ -152,11 +152,18 @@ const propertySchema = new Schema({
     },
     user: {
         type: Schema.Types.ObjectId, 
-        ref: "Person"
+        ref: "User"
     },
     contract: {
         type: Schema.Types.ObjectId, 
         ref: "Contract"
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    updatedAt: {
+        type: Date,
     }
 }, { versionKey: false });
 

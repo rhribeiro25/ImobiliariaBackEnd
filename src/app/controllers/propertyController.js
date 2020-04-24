@@ -6,73 +6,86 @@ router.use(authMiddleware);
 
 router.post('/create', async (req, res) => {
     try{
-        const property = await Property.create(req.body);
+        const property = await Property.create({ ...req.body, user: req.userId });
         return res.status(201).send({ property });
     } catch(err){
-        return res.status(500).send({ error: "Failed to create property!" });
+        return res.status(500).send({ 
+            error: {
+                name: err.name,
+                description: err.message,
+                message: "Failed to create a new property!"
+            }
+        });
     }
 });
 
 router.get('/list', async (req, res) => {
     try {
-        await Property.find().populate(["user", "contract"]).exec((err, properties) => {
-            if (err)
-                return res.status(500).send({ error: "Failed to find properties!" });
-            else if(!properties)
-                return res.status(404).send({ error: "People not found!" });
-            else
-                return res.status(200).send(properties);
-        })
-    } catch (error) {
-        res.status(500).send({ error: "Failed to list properties!" });
+        const properties = await Property.find().populate(["user", "contract"]);
+        if(!properties)
+            return res.status(404).send({ error: "Propert not found!" });
+        return res.status(200).send(properties);
+    } catch(err){
+        return res.status(500).send({ 
+            error: {
+                name: err.name,
+                description: err.message,
+                message: "Failed to list property!"
+            }
+        });
     }
 });
 
 router.get('/show/:id', async (req, res) => {
     try {
-        await Property.findById(req.params.id).populate(["user", "contract"]).exec((err, property) => {
-            if (err)
-                return res.status(500).send({ error: "Failed to find property!" });
-            else if(!property)
-                return res.status(404).send({ error: "Property not found!" });
-            else
-                res.status(200).send(property);
-        })
-    } catch (error) {
-        res.status(500).send({ error: "Failed to show property!" });
+        const property = await Property.findById(req.params.id).populate(["user", "contract"]);
+        if(!property)
+            return res.status(404).send({ error: "Property not found!" });
+        res.status(200).send(property);
+    } catch(err){
+        return res.status(500).send({ 
+            error: {
+                name: err.name,
+                description: err.message,
+                message: "Failed to show property!"
+            }
+        });
     }
 });
 
 router.delete('/delete/:id', async (req, res) => {
     try {
-        await Property.findByIdAndRemove(req.params.id, (err, property) => {
-            if (err)
-                res.status(500).send({error: "Failed to delete property!"});
-            else if(!property)
-                return res.status(404).send({ error: "Property not found!" });
-            else
-                res.status(200).send("Successful property deleted!");
-        })
-    } catch (error) {
-        res.status(500).send({ error: "Failed to delete people!" });
+        const property = await Property.findByIdAndRemove(req.params.id);
+        if(!property)
+            return res.status(404).send({ error: "Property not found!" });
+        res.status(200).send("Successful property deleted!");
+    } catch(err){
+        return res.status(500).send({ 
+            error: {
+                name: err.name,
+                description: err.message,
+                message: "Failed to delete property!"
+            }
+        });
     }
 });
 
 router.put('/update/:id', async (req, res) => {
-    Property.findById(req.params.id, (err, property) => {
-        if (err)
+    try {
+        req.body.updatedAt = Date.now();
+        const property = await Property.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        if (!property)
             return res.status(404).send({ error: "Property not found!" });
-        else if (!property)
-            return res.status(404).send({ error: "Property not found!" });
-        else {
-            let cont = new Property(req.body);
-            if (cont.id === property.id) {
-                cont.save()
-                    .then((cont) => res.status(200).send(cont))
-                    .catch((e) => res.status(500).send(e));
+        res.status(200).send(property);
+    } catch(err){
+        return res.status(500).send({ 
+            error: {
+                name: err.name,
+                description: err.message,
+                message: "Failed to update property!"
             }
-        }
-    })
+        });
+    }
 });
 
-module.exports = app => app.use('/properties', router);
+module.exports = app => app.use('/property', router);

@@ -1,82 +1,92 @@
 const express = require('express');
-const authMiddleware = require("../middlewares/auth")
+const authMiddleware = require("../middlewares/auth");
 const Person = require('../models/person');
-const Contract = require('../models/contract');
 const router = express.Router();
 router.use(authMiddleware);
 
 router.post('/create', async (req, res) => {
     try{
-        if(await Person.findOne({ email: req.body.email }))
-            return res.status(404).send({ error: "Person already exists!" });
-        const person = await Person.create( {...req.body, user: req.userId });
+        const person = await Person.create({ ...req.body, user: req.userId });
         person.password = undefined;
         return res.status(201).send({ person });
-    } catch(error){
-        return res.status(500).send({ error: "Failed to create person!" });
+    } catch(err){
+        return res.status(500).send({ 
+            error: {
+                name: err.name,
+                description: err.message,
+                message: "Failed to create a new person!"
+            }
+        });
     }
 });
 
 router.get('/list', async (req, res) => {
     try {
-        await Person.find().populate(["user", "contract"]).exec((err, people) => {
-            if (err)
-                return res.status(500).send({ error: "Failed to find people!" });
-            else if(!people)
-                return res.status(404).send({ error: "People not found!" });
-            else
-                return res.status(200).send(people);
-        })
-    } catch (error) {
-        res.status(500).send({ error: "Failed to list people!" });
+        const people = await Person.find().populate(["user", "contract"]);
+        if(!people)
+            return res.status(404).send({ error: "People not found!" });
+        return res.status(200).send(people);
+    } catch (err) {
+        return res.status(500).send({ 
+            error: {
+                name: err.name,
+                description: err.message,
+                message: "Failed to list person!"
+            }
+        });
     }
 });
 
 router.get('/show/:id', async (req, res) => {
     try {
-        await Person.findById(req.params.id).populate(["user", "contract"]).exec((err, person) => {
-            if (err)
-                return res.status(500).send({ error: "Failed to find person!" });
-            else if(!person)
-                return res.status(404).send({ error: "Person not found!" });
-            else
-                res.status(200).send(person);
-        })
-    } catch (error) {
-        res.status(500).send({ error: "Failed to show person!" });
+        const person = await Person.findById(req.params.id).populate(["user", "contract"]);
+        if(!person)
+            return res.status(404).send({ error: "Person not found!" });
+        res.status(200).send(person);
+    } catch (err) {
+        return res.status(500).send({ 
+            error: {
+                name: err.name,
+                description: err.message,
+                message: "Failed to show person!"
+            }
+        });
     }
 });
 
 router.delete('/delete/:id', async (req, res) => {
     try {
-        await Person.findByIdAndRemove(req.params.id, (err, person) => {
-            if (err)
-                res.status(500).send({error: "Failed to delete person!"});
-            else if(!person)
-                return res.status(404).send({ error: "Person not found!" });
-            else
-                res.status(200).send("Successful person deleted!");
-        })
-    } catch (error) {
-        res.status(500).send({ error: "Failed to delete people!" });
+        const person = await Person.findByIdAndRemove(req.params.id);
+        if(!person)
+            return res.status(404).send({ error: "Person not found!" });
+        res.status(200).send("Successful person deleted!");
+    } catch (err) {
+        return res.status(500).send({ 
+            error: {
+                name: err.name,
+                description: err.message,
+                message: "Failed to delete person!"
+            }
+        });
     }
 });
 
 router.put('/update/:id', async (req, res) => {
-    Person.findById(req.params.id, (err, p) => {
-        if (err)
+    try {
+        req.body.updatedAt = Date.now();
+        const person = await Person.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        if (!person)
             return res.status(404).send({ error: "Person not found!" });
-        else if (!p)
-            return res.status(404).send({ error: "Person not found!" });
-        else {
-            let pc = new Person(req.body);
-            if (pc.id === p.id) {
-                pc.save()
-                    .then((pc) => res.status(200).send(pc))
-                    .catch((e) => res.status(500).send(e));
+        res.status(200).send(person);
+    } catch (err) {
+        return res.status(500).send({ 
+            error: {
+                name: err.name,
+                description: err.message,
+                message: "Failed to update person!"
             }
-        }
-    })
+        });
+    }
 });
 
-module.exports = app => app.use('/people', router);
+module.exports = app => app.use('/person', router);

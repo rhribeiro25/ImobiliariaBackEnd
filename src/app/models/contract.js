@@ -14,7 +14,14 @@ var contractSchema = new Schema({
     },
     user: {
         type: Schema.Types.ObjectId, 
-        ref: "Person"
+        ref: "User"
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    updatedAt: {
+        type: Date,
     }
 }, { versionKey: false });
 

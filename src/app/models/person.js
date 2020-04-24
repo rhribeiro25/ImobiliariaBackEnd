@@ -3,10 +3,10 @@ const bcrypt = require("bcryptjs");
 const Schema = mongoose.Schema;
 
 const personSchema = new Schema({
-    type: {
+    typePerson: {
         type: String,
         required: true,
-        enum: ["LOCATOR", "TENANT", "WITNESS", "USER", "ADMIN"]
+        enum: ["LOCATOR", "TENANT", "WITNESS"]
     },
     firstName: {
         type: String,
@@ -15,16 +15,6 @@ const personSchema = new Schema({
     lastName: {
         type: String,
         required: true
-    },
-    image: {
-        name: {
-            type: String,
-            required: true
-        },
-        path: {
-            type: String,
-            required: true
-        }
     },
     birthday: {
         type: String
@@ -38,24 +28,9 @@ const personSchema = new Schema({
     email: {
         type: String
     },
-    password: {
-        type: String,
-        select: false
-    },
-    passwordResetToken: {
-        type: String,
-        select: false
-    },
-    passwordResetExpires: {
-        type: String,
-        select: false
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
+    rent: Number,
     documents: [{
-        type: {
+        typeDocument: {
             type: String,
             required: true,
             enum: ["CPF", "IDENTITY", "CNPJ", "PASSPORT"]
@@ -71,9 +46,8 @@ const personSchema = new Schema({
             type: Date
         }
     }],
-    rent: Number,
     addresses: [{
-        type: {
+        typeAddress: {
             type: String,
             required: true,
             enum: ["OFFICIAL", "CORRESPONDENCE"]
@@ -107,7 +81,7 @@ const personSchema = new Schema({
         }
     }],
     phoneNumbers: [{
-        type: {
+        typePhone: {
             type: String,
             required: false,
             enum: ["CELLPHONE", "TELEPHONE", "FAX"]
@@ -127,14 +101,15 @@ const personSchema = new Schema({
     },
     user: {
         type: Schema.Types.ObjectId, 
-        ref: "Person"
+        ref: "User"
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    updatedAt: {
+        type: Date,
     }
 }, { versionKey: false });
-
-personSchema.pre("save", async function(next) {
-    const hash = await bcrypt.hash(this.password, 10);
-    this.password = hash;
-    next();
-});
 
 module.exports = mongoose.model("Person", personSchema);
