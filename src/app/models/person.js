@@ -3,51 +3,61 @@ const bcrypt = require("bcryptjs");
 const Schema = mongoose.Schema;
 
 const personSchema = new Schema({
-    typePerson: {
+    typeVal: {
         type: String,
         required: true,
         enum: ["LOCATOR", "TENANT", "WITNESS"]
     },
-    firstName: {
+    fName: {
         type: String,
         required: true
     },
-    lastName: {
+    lName: {
         type: String,
         required: true
     },
-    birthday: {
+    birth: {
         type: String
     },
-    motherName: {
+    mother: {
         type: String
     },
-    fatherName: {
+    father: {
         type: String
     },
     email: {
         type: String
     },
     rent: Number,
-    documents: [{
-        typeDocument: {
+    docs: [{
+        typeVal: {
             type: String,
             required: true,
             enum: ["CPF", "IDENTITY", "CNPJ", "PASSPORT"]
         },
-        digit: {
+        num: {
             type: String,
             required: true
         },
-        shippingDate: {
+        send: {
             type: Date
         },
-        dueDate: {
+        due: {
             type: Date
-        }
+        },
+        files: [{
+            name: {
+                type: String,
+                required: true
+            },
+            path: {
+                type: String,
+                required: true
+            }
+        }]
     }],
     addresses: [{
-        typeAddress: {
+        typeVal: {
             type: String,
             required: true,
             enum: ["OFFICIAL", "CORRESPONDENCE"]
@@ -56,7 +66,7 @@ const personSchema = new Schema({
             type: String,
             required: true
         },
-        neighborhoods: {
+        district: {
             type: String,
             required: true
         },
@@ -68,7 +78,7 @@ const personSchema = new Schema({
             type: String,
             required: true
         },
-        number: {
+        num: {
             type: String,
             required: true
         },
@@ -76,38 +86,34 @@ const personSchema = new Schema({
             type: String,
             required: true
         },
-        complement: {
+        compl: {
             type: String
         }
     }],
-    phoneNumbers: [{
-        typePhone: {
+    phones: [{
+        typeVal: {
             type: String,
-            required: false,
+            required: true,
             enum: ["CELLPHONE", "TELEPHONE", "FAX"]
         },
         ddd: {
             type: String,
-            required: false
+            required: true
         },
-        phoneNumber: {
+        num: {
             type: String,
-            required: false
+            required: true
         }
     }],
-    contract: {
-        type: Schema.Types.ObjectId, 
-        ref: "Contract"
-    },
-    user: {
+    crBy: {
         type: Schema.Types.ObjectId, 
         ref: "User"
     },
-    createdAt: {
+    crAt: {
         type: Date,
         default: Date.now
     },
-    updatedAt: {
+    upAt: {
         type: Date,
     }
 }, { versionKey: false });

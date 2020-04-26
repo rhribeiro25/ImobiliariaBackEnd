@@ -18,9 +18,9 @@ router.post('/create', async (req, res) => {
         const { email } = req.body;
         const userExists = await User.findOne({ email });
         if(userExists)
-            return res.status(404).send({ error: "User already exists!" });
+            return res.status(400).send({ error: "User already exists!" });
         const user = await User.create(req.body);
-        user.password = undefined;
+        user.pass = undefined;
         return res.status(201).send({ user, token: generateToken({ id: user.id }) });
     } catch(err){
         return res.status(500).send({ 
@@ -33,15 +33,84 @@ router.post('/create', async (req, res) => {
     }
 });
 
-router.post("/authenticate", async (req, res) => {
+router.get('/list', async (req, res) => {
     try {
-        const { email, password } = req.body;
-        const user = await User.findOne({ email }).select("+password");
+        const users = await User.find();
+        if(!users)
+            return res.status(404).send({ error: "Users not found!" });
+        return res.status(200).send(users);
+    } catch (err) {
+        return res.status(500).send({ 
+            error: {
+                name: err.name,
+                description: err.message,
+                message: "Failed to list users!"
+            }
+        });
+    }
+});
+
+router.get('/show/:id', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
         if(!user)
             return res.status(404).send({ error: "User not found!" });
-        if(!await bcrypt.compare(password, user.password))
+        res.status(200).send(user);
+    } catch (err) {
+        return res.status(500).send({ 
+            error: {
+                name: err.name,
+                description: err.message,
+                message: "Failed to show user!"
+            }
+        });
+    }
+});
+
+router.delete('/delete/:id', async (req, res) => {
+    try {
+        const user = await User.findByIdAndRemove(req.params.id);
+        if(!user)
+            return res.status(404).send({ error: "User not found!" });
+        res.status(200).send("Successful user deleted!");
+    } catch (err) {
+        return res.status(500).send({ 
+            error: {
+                name: err.name,
+                description: err.message,
+                message: "Failed to delete user!"
+            }
+        });
+    }
+});
+
+router.put('/update/:id', async (req, res) => {
+    try {
+        req.body.updatedAt = Date.now();
+        const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        if (!user)
+            return res.status(404).send({ error: "User not found!" });
+        res.status(200).send(user);
+    } catch (err) {
+        return res.status(500).send({ 
+            error: {
+                name: err.name,
+                description: err.message,
+                message: "Failed to update user!"
+            }
+        });
+    }
+});
+
+router.post("/authenticate", async (req, res) => {
+    try {
+        const { email, pass } = req.body;
+        const user = await User.findOne({ email }).select("+pass");
+        if(!user)
+            return res.status(404).send({ error: "User not found!" });
+        if(!await bcrypt.compare(pass, user.pass))
             return res.status(404).send({ error: "Invalid password!" });
-        user.password = undefined;
+        user.pass = undefined;
         res.status(200 ).send({ user, token: generateToken({ id: user.id }) });
     } catch(err){
         return res.status(500).send({ 
@@ -65,8 +134,8 @@ router.post("/forgot_password", async (req, res) => {
         now.setHours(now.getHours() + 1);
         await User.findByIdAndUpdate(user.id, {
             "$set": {
-                passwordResetToken: token,
-                passwordResetExpires: now
+                resetToken: token,
+                resetExpires: now
             }
         });
         mailOptions.to = email;
@@ -90,17 +159,17 @@ router.post("/forgot_password", async (req, res) => {
 
 router.post("/reset_password", async (req, res) => {
     try {
-        const { email, token, password } = req.body;
+        const { email, token, pass } = req.body;
         const user = await User.findOne({ email })
-        .select("+passwordResetToken passwordResetExpires")
+        .select("+resetToken resetExpires")
         const now = new Date();
         if(!user)
             return res.status(404).send({ error: "User not found!" });
-        if(token !== user.passwordResetToken)
+        if(token !== user.resetToken)
             return res.status(404).send({ error: "Token Invalid!" });
-        if(now > user.passwordResetExpires)
+        if(now > user.resetExpires)
             return res.status(404).send({ error: "Token expired, generate a new one!" });
-        user.password = password;
+        user.pass = pass;
         await user.save();
         res.status(200).send("Successful password reset!")
     } catch(err){

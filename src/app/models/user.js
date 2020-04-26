@@ -3,16 +3,16 @@ const bcrypt = require("bcryptjs");
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
-    typeUser: {
+    typeVal: {
         type: String,
         required: true,
         enum: ["USER", "ADMIN"]
     },
-    firstName: {
+    fName: {
         type: String,
         required: true
     },
-    lastName: {
+    lName: {
         type: String,
         required: true
     },
@@ -26,52 +26,53 @@ const userSchema = new Schema({
             required: true
         }
     },
-    birthday: {
+    birth: {
         type: String
     },
     email: {
         type: String,
+        required: true,
         unique: true
     },
-    password: {
+    pass: {
         type: String,
         select: false
     },
-    passwordResetToken: {
+    resetToken: {
         type: String,
         select: false
     },
-    passwordResetExpires: {
+    resetExpires: {
         type: String,
         select: false
     },
-    phoneNumbers: [{
-        typePhone: {
+    phones: [{
+        typeVal: {
             type: String,
-            required: false,
+            required: true,
             enum: ["CELLPHONE", "TELEPHONE", "FAX"]
         },
         ddd: {
             type: String,
-            required: false
+            required: true
         },
-        phoneNumber: {
+        num: {
             type: String,
-            required: false
+            required: true
         }
     }],
-    createdAt: {
+    crAt: {
         type: Date,
         default: Date.now
     },
-    updatedAt: {
+    upAt: {
         type: Date,
     }
 }, { versionKey: false });
 
 userSchema.pre("save", async function(next) {
-    const hash = await bcrypt.hash(this.password, 10);
-    this.password = hash;
+    const hash = await bcrypt.hash(this.pass, 10);
+    this.pass = hash;
     next();
 });
 
