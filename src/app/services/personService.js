@@ -1,19 +1,56 @@
-const Person = require('../models/person');
+const PersonRepository = require('../repositories/personRepository');
 
-exports.create = async function (newPerson) {
-    let personExists;
+exports.create = async function(req) {
+    const { body, userId } = req;
+    let newPerson = body;
+    let existsPerson = await this.findByDoc(newPerson.docs);
     let person;
-    const { docs } = newPerson;
-    await Promise.all(docs.map(async doc => {
-        if(doc.typeVal === "CPF" || doc.typeVal === "CNPJ")
-            personExists = await Person.findOne({ "docs.num": doc.num })
-    }));
-    if(personExists) {
-        person = await Person.findByIdAndUpdate(personExists._id, newPerson, { new: true, runValidators: true });
-        return { status: 200, person: person };
+    let status;
+    if(existsPerson) {
+        person = await PersonRepository.findByIdAndUpdate(existsPerson._id, newPerson);
+        status = 200;
     }
     else {
-        person = await Person.create({ ...newPerson, crBy: req.userId });
-        return { status: 200, person: person };
+        person = await PersonRepository.create(newPerson, userId);
+        status = 201;
     }
+    return { status, person };
+}
+
+exports.findByDoc = async function(docs){
+    let existsDoc;
+    await Promise.all(docs.map(async doc => {
+        if(doc.typeVal === "CPF" || doc.typeVal === "CNPJ")
+            existsDoc = doc;
+    }));
+    return await PersonRepository.findByDoc(existsDoc);
+}
+
+exports.findAllPopulateRelations = async function(relations){
+    return await PersonRepository.findAllPopulateRelations(relations);
+}
+
+exports.findByIdPopulateRelations = async function(id, relations){
+    return await PersonRepository.findByIdPopulateRelations(id, relations);
+}
+
+exports.findByIdAndRemove = async function(id){
+    return await PersonRepository.findByIdAndRemove(id);
+}
+
+exports.findByDocAndUpdate = async function(req, actionsJson){
+    const { body } = req;
+    let newPerson = body;
+    let existsPerson = await this.findByDoc(newPerson.docs);
+    let person;
+    let status;
+    if(existsPerson) {
+        newPerson.updatedAt = Date.now();
+        person = await PersonRepository.findByIdAndUpdate(req.params.id, newPerson, actionsJson);
+        status = 200;
+    }
+    else {
+        status = 400;
+    }
+    return { status, person };
 }

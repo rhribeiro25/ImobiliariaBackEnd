@@ -1,8 +1,8 @@
 const express = require('express');
-const authMiddleware = require("../middlewares/auth")
-const Person = require('../models/person');
-const Contract = require('../models/contract');
-const Property = require('../models/property');
+const authMiddleware = require("../../middlewares/auth")
+const Person = require('../models/personModel');
+const Contract = require('../models/contractModel');
+const Property = require('../models/propertyModel');
 const router = express.Router();
 router.use(authMiddleware);
 
