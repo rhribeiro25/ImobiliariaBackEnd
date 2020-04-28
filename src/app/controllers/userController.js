@@ -1,102 +1,92 @@
 const express = require('express');
-const bcrypt = require("bcryptjs");
-const crypto = require("crypto");
-const mailer = require("../../modules/mailer");
-const jwt = require("jsonwebtoken");
-const authConfig = require("../../config/auth");
-const User = require('../models/userModel');
+const authMiddleware = require("../../middlewares/auth");
+const UserService = require('../services/userService');
 const router = express.Router();
-const hbs = require("nodemailer-express-handlebars");
-const { mailOptions, hbsOptions } = require("../../config/mail_forgot_password.json");
-
-function generateToken(params = {}){
-    return jwt.sign(params, authConfig.secret, {expiresIn: 86400});
-}
+const routerAuth = express.Router();
+routerAuth.use(authMiddleware);
 
 router.post('/create', async (req, res) => {
-    try{
-        const { email } = req.body;
-        const userExists = await User.findOne({ email });
-        if(userExists)
-            return res.status(400).send({ error: "User already exists!" });
-        const user = await User.create(req.body);
-        user.pass = undefined;
-        return res.status(201).send({ user, token: generateToken({ id: user.id }) });
-    } catch(err){
-        return res.status(500).send({ 
+    try {
+        const email = req.body.email;
+        const userExists = await UserService.findByMail(email);
+        if (userExists)
+            return res.status(400).send({ error: { message: "Email já cadastrado no sistema!" } });
+        const user = await UserService.create(req);
+        return res.status(201).send(user);
+    } catch (error) {
+        return res.status(500).send({
             error: {
-                name: err.name,
-                description: err.message,
-                message: "Failed to create a new user!"
+                name: error.name,
+                description: error.message,
+                message: "Falha ao criar novo usuário!"
             }
         });
     }
 });
 
-router.get('/list', async (req, res) => {
+routerAuth.get('/list', async (req, res) => {
     try {
-        const users = await User.find();
-        if(!users)
-            return res.status(404).send({ error: "Users not found!" });
+        const users = await UserService.findAll();
+        if (!users)
+            return res.status(404).send({ error: { message: "Usuários não encontrados!" } });
         return res.status(200).send(users);
-    } catch (err) {
-        return res.status(500).send({ 
+    } catch (error) {
+        return res.status(500).send({
             error: {
-                name: err.name,
-                description: err.message,
-                message: "Failed to list users!"
+                name: error.name,
+                description: error.message,
+                message: "Falha ao listar usuários!"
             }
         });
     }
 });
 
-router.get('/show/:id', async (req, res) => {
+routerAuth.get('/show/:id', async (req, res) => {
     try {
-        const user = await User.findById(req.params.id);
-        if(!user)
-            return res.status(404).send({ error: "User not found!" });
-        res.status(200).send(user);
-    } catch (err) {
-        return res.status(500).send({ 
-            error: {
-                name: err.name,
-                description: err.message,
-                message: "Failed to show user!"
-            }
-        });
-    }
-});
-
-router.delete('/delete/:id', async (req, res) => {
-    try {
-        const user = await User.findByIdAndRemove(req.params.id);
-        if(!user)
-            return res.status(404).send({ error: "User not found!" });
-        res.status(200).send("Successful user deleted!");
-    } catch (err) {
-        return res.status(500).send({ 
-            error: {
-                name: err.name,
-                description: err.message,
-                message: "Failed to delete user!"
-            }
-        });
-    }
-});
-
-router.put('/update/:id', async (req, res) => {
-    try {
-        req.body.updatedAt = Date.now();
-        const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        const user = await UserService.findById(req.params.id);
         if (!user)
-            return res.status(404).send({ error: "User not found!" });
+            return res.status(404).send({ error: { message: "Usuário não encontrado!" } });
         res.status(200).send(user);
-    } catch (err) {
-        return res.status(500).send({ 
+    } catch (error) {
+        return res.status(500).send({
             error: {
-                name: err.name,
-                description: err.message,
-                message: "Failed to update user!"
+                name: error.name,
+                description: error.message,
+                message: "Falha na busca de usuário!"
+            }
+        });
+    }
+});
+
+routerAuth.delete('/delete/:id', async (req, res) => {
+    try {
+        const user = await UserService.findByIdAndRemove(req.params.id);
+        if (!user)
+            return res.status(404).send({ error: { message: "Usuário não encontrado!" } });
+        res.status(200).send("Sucesso ao deletar usuário!");
+    } catch (error) {
+        return res.status(500).send({
+            error: {
+                name: error.name,
+                description: error.message,
+                message: "Falha ao deletar usuário!"
+            }
+        });
+    }
+});
+
+routerAuth.put('/update/:id', async (req, res) => {
+    try {
+        const user = await UserService.findByIdAndUpdate(req, { new: true, runValidators: true });
+        if (!user)
+            return res.status(404).send({ error: { message: "Usuário não encontrado!" } });
+        res.status(200).send(user);
+    } catch (error) {
+        return res.status(500).send({
+            error: {
+                name: error.name,
+                description: error.message,
+                message: "Falha na atualização de usuário!"
             }
         });
     }
@@ -105,53 +95,40 @@ router.put('/update/:id', async (req, res) => {
 router.post("/authenticate", async (req, res) => {
     try {
         const { email, pass } = req.body;
-        const user = await User.findOne({ email }).select("+pass");
-        if(!user)
-            return res.status(404).send({ error: "User not found!" });
-        if(!await bcrypt.compare(pass, user.pass))
-            return res.status(404).send({ error: "Invalid password!" });
+        const user = await UserService.findByMail(email, "+pass");
+        if (!user)
+            return res.status(404).send({ error: { message: "Usuário não encontrado!" } });
+        const isAuthenticated = await UserService.isAuthenticated(pass, user.pass);
+        if (!isAuthenticated)
+            return res.status(404).send({ error: { message: "Senha Inválida!" } });
         user.pass = undefined;
-        res.status(200 ).send({ user, token: generateToken({ id: user.id }) });
-    } catch(err){
-        return res.status(500).send({ 
+        res.status(200).send({ user, token: UserService.generateToken({ id: user.id }) });
+    } catch (error) {
+        return res.status(500).send({
             error: {
-                name: err.name,
-                description: err.message,
-                message: "Failed to authenticate user!"
+                name: error.name,
+                description: error.message,
+                message: "Falha na autenticação de usuário!"
             }
         });
     }
 });
 
 router.post("/forgot_password", async (req, res) => {
-    try{
+    try {
         const { email } = req.body;
-        const user = await User.findOne({ email });
-        if(!user)
-            return res.status(404).send({ error: "User not found!" });
-        const token = crypto.randomBytes(20).toString("hex");
-        const now = new Date();
-        now.setHours(now.getHours() + 1);
-        await User.findByIdAndUpdate(user.id, {
-            "$set": {
-                resetToken: token,
-                resetExpires: now
-            }
-        });
-        mailOptions.to = email;
-        mailOptions.context.token = token;
-        mailer.use("compile", hbs(hbsOptions));
-        await mailer.sendMail(mailOptions, (err) => {
-            if(err)
-                return res.status(500).send({ error: "Can not send forgot password email!" });
-            return res.status(200).send("Successful E-mail send!" );
-        });
-    } catch(err){
-        return res.status(500).send({ 
+        let user = await UserService.findByMail(email);
+        if (!user)
+            return res.status(404).send({ error: { message: "Usuário não encontrado!" } });
+        const token = await UserService.updateTokenExpires(user.id);
+        await UserService.sendMailRecoveryPassword({ email, token });
+        return res.status(200).send("Sucesso ao enviar email!");
+    } catch (error) {
+        return res.status(500).send({
             error: {
-                name: err.name,
-                description: err.message,
-                message: "Failed to forgot password, try again!"
+                name: error.name,
+                description: error.message,
+                message: "Falha ao enviar email de recuperação de senha, tente novamente!"
             }
         });
     }
@@ -160,27 +137,24 @@ router.post("/forgot_password", async (req, res) => {
 router.post("/reset_password", async (req, res) => {
     try {
         const { email, token, pass } = req.body;
-        const user = await User.findOne({ email })
-        .select("+resetToken resetExpires")
-        const now = new Date();
-        if(!user)
-            return res.status(404).send({ error: "User not found!" });
-        if(token !== user.resetToken)
-            return res.status(404).send({ error: "Token Invalid!" });
-        if(now > user.resetExpires)
-            return res.status(404).send({ error: "Token expired, generate a new one!" });
-        user.pass = pass;
-        await user.save();
-        res.status(200).send("Successful password reset!")
-    } catch(err){
-        return res.status(500).send({ 
+        let user = await UserService.findByMail(email, "+resetToken resetExpires")
+        if (!user)
+            return res.status(404).send({ error: { message: "Usuário não encontrado!" } });
+        if (token !== user.resetToken)
+            return res.status(404).send({ error: { message: "Token inválido, favor tentar novamente!" } });
+        if (new Date() > user.resetExpires)
+            return res.status(404).send({ error: { message: "Token expirado, favor gerar token novamente!" } });
+        await UserService.updatePassword(user.id, pass);
+        res.status(200).send("Sucesso ao resetar senha!")
+    } catch (error) {
+        return res.status(500).send({
             error: {
-                name: err.name,
-                description: err.message,
-                message: "Failed to reset password, try again!"
+                name: error.name,
+                description: error.message,
+                message: "Falha ao resetar senha, tente novamente!"
             }
         });
     }
 })
 
-module.exports = app => app.use('/user', router);
+module.exports = app => app.use('/user', [router, routerAuth]);

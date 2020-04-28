@@ -106,7 +106,7 @@ const personSchema = new Schema({
         }
     }],
     crBy: {
-        type: Schema.Types.ObjectId, 
+        type: Schema.Types.ObjectId,
         ref: "User"
     },
     crAt: {

@@ -6,7 +6,7 @@ const userSchema = new Schema({
     typeVal: {
         type: String,
         required: true,
-        enum: ["USER", "ADMIN"]
+        enum: ["USER", "ADMIN", "BROKER"]
     },
     fName: {
         type: String,
@@ -69,11 +69,5 @@ const userSchema = new Schema({
         type: Date,
     }
 }, { versionKey: false });
-
-userSchema.pre("save", async function(next) {
-    const hash = await bcrypt.hash(this.pass, 10);
-    this.pass = hash;
-    next();
-});
 
 module.exports = mongoose.model("User", userSchema);
