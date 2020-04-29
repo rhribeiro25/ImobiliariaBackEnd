@@ -38,15 +38,15 @@ exports.findByIdAndRemove = async function (id) {
     return await PersonRepository.findByIdAndRemove(id);
 }
 
-exports.findByDocAndUpdate = async function (req, actionsJson) {
+exports.findByIdAndUpdate = async function (req, actionsJson) {
     const { body } = req;
     let newPerson = body;
     let existsPerson = await this.findByDoc(newPerson.docs);
     let updatedPerson;
     let status;
     if (existsPerson) {
-        newPerson.updatedAt = Date.now();
-        updatedPerson = await PersonRepository.findByIdAndUpdate(req.params.id, newPerson, { new: true, runValidators: true });
+        newPerson.upAt = Date.now();
+        updatedPerson = await PersonRepository.findByIdAndUpdate(req.params.id, { $set: newPerson }, actionsJson);
         status = 200;
     }
     else {

@@ -38,8 +38,8 @@ exports.findByIdAndRemove = async function (id) {
 exports.findByIdAndUpdate = async function (req, actionsJson) {
     const { body } = req;
     let newUser = body;
-    newUser.updatedAt = Date.now();
-    return await UserRepository.findByIdAndUpdate(req.params.id, newUser, actionsJson);
+    newUser.upAt = Date.now();
+    return await UserRepository.findByIdAndUpdate(req.params.id, { $set: newUser }, actionsJson);
 
 }
 
@@ -60,8 +60,9 @@ exports.updateTokenExpires = async function (id) {
 }
 
 exports.updatePassword = async function (id, pass) {
+    const upAt = Date.now();
     pass = await this.EncryptPassword(pass);
-    await UserRepository.findByIdAndUpdate(id, { "$set": { pass } });
+    await UserRepository.findByIdAndUpdate(id, { "$set": { pass, upAt } });
 }
 
 exports.isAuthenticated = async function (pass, hash) {
@@ -73,5 +74,5 @@ exports.EncryptPassword = async function (pass) {
     return await bcrypt.hash(pass, salt);
 }
 exports.generateToken = function (params = {}) {
-    return jwt.sign(params, authConfig.secret, { expiresIn: 86400 });
+    return jwt.sign(params, authConfig.secret, { expiresIn: 28800 });
 }

@@ -70,9 +70,9 @@ routerAuth.delete('/delete/:id', async (req, res) => {
     }
 });
 
-routerAuth.put('/update/:id', async (req, res) => {
+routerAuth.patch('/update/:id', async (req, res) => {
     try {
-        let { status, person } = await PersonService.findByDocAndUpdate(req, { new: true, runValidators: true });
+        let { status, person } = await PersonService.findByIdAndUpdate(req, { new: true, runValidators: true });
         if (person)
             res.status(status).send({ person });
         else

@@ -75,7 +75,7 @@ routerAuth.delete('/delete/:id', async (req, res) => {
     }
 });
 
-routerAuth.put('/update/:id', async (req, res) => {
+routerAuth.patch('/update/:id', async (req, res) => {
     try {
         const user = await UserService.findByIdAndUpdate(req, { new: true, runValidators: true });
         if (!user)
@@ -134,7 +134,7 @@ router.post("/forgot_password", async (req, res) => {
     }
 });
 
-router.post("/reset_password", async (req, res) => {
+router.patch("/reset_password", async (req, res) => {
     try {
         const { email, token, pass } = req.body;
         let user = await UserService.findByMail(email, "+resetToken resetExpires")
