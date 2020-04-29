@@ -3,7 +3,7 @@ var Schema = mongoose.Schema;
 
 const propertySchema = new Schema({
     details: {
-        typeProperty: {
+        typeVal: {
             type: String,
             required: true,
             enum: [ "APARTMENT", "KITNET", "HOUSE", "CONDOMINIUM_HOUSE" ]
@@ -47,7 +47,7 @@ const propertySchema = new Schema({
             type: String,
             required: true
         },
-        neighborhoods: {
+        district: {
             type: String,
             required: true
         },
@@ -59,7 +59,7 @@ const propertySchema = new Schema({
             type: String,
             required: true
         },
-        number: {
+        num: {
             type: String,
             required: true
         },
@@ -67,7 +67,7 @@ const propertySchema = new Schema({
             type: String,
             required: true
         },
-        complement: {
+        compl: {
             type: String
         }
     },
@@ -150,7 +150,7 @@ const propertySchema = new Schema({
         machine_washes_and_dries: Boolean,
         dryer: Boolean,
     },
-    user: {
+    crBy: {
         type: Schema.Types.ObjectId, 
         ref: "User"
     },
@@ -158,11 +158,11 @@ const propertySchema = new Schema({
         type: Schema.Types.ObjectId, 
         ref: "Contract"
     },
-    createdAt: {
+    crAt: {
         type: Date,
         default: Date.now
     },
-    updatedAt: {
+    upAt: {
         type: Date,
     }
 }, { versionKey: false });

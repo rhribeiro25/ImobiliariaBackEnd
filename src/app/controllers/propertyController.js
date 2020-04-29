@@ -1,19 +1,19 @@
 const express = require('express');
-const authMiddleware = require("../../middlewares/auth")
-const Property = require('../models/propertyModel');
+const PropertyService = require('../services/propertyService');
+const authSecurity = require("../../security/auth");
 const router = express.Router();
-router.use(authMiddleware);
+router.use(authSecurity);
 
 router.post('/create', async (req, res) => {
     try{
-        const property = await Property.create({ ...req.body, user: req.userId });
+        const property = await PropertyService.create(req);
         return res.status(201).send({ property });
     } catch(err){
-        return res.status(500).send({ 
+        return res.status(400).send({ 
             error: {
                 name: err.name,
                 description: err.message,
-                message: "Failed to create a new property!"
+                message: "Falha ao criar novo Imóvel!"
             }
         });
     }
@@ -21,16 +21,16 @@ router.post('/create', async (req, res) => {
 
 router.get('/list', async (req, res) => {
     try {
-        const properties = await Property.find().populate(["user", "contract"]);
+        const properties = await PropertyService.findAllPopulateRelations(["crBy", "contract"]);
         if(!properties)
-            return res.status(404).send({ error: "Propert not found!" });
+            return res.status(400).send({ error: "Imóvel não encontrado!" });
         return res.status(200).send(properties);
     } catch(err){
-        return res.status(500).send({ 
+        return res.status(400).send({ 
             error: {
                 name: err.name,
                 description: err.message,
-                message: "Failed to list property!"
+                message: "Falha ao listar Imóvel!"
             }
         });
     }
@@ -38,16 +38,16 @@ router.get('/list', async (req, res) => {
 
 router.get('/show/:id', async (req, res) => {
     try {
-        const property = await Property.findById(req.params.id).populate(["user", "contract"]);
+        const property = await PropertyService.findByIdPopulateRelations(req.params.id, ["crBy", "contract"]);
         if(!property)
-            return res.status(404).send({ error: "Property not found!" });
+            return res.status(400).send({ error: "Imóvel não encontrado!" });
         res.status(200).send(property);
     } catch(err){
-        return res.status(500).send({ 
+        return res.status(400).send({ 
             error: {
                 name: err.name,
                 description: err.message,
-                message: "Failed to show property!"
+                message: "Falha ao localizar Imóvel!"
             }
         });
     }
@@ -55,34 +55,33 @@ router.get('/show/:id', async (req, res) => {
 
 router.delete('/delete/:id', async (req, res) => {
     try {
-        const property = await Property.findByIdAndRemove(req.params.id);
+        const property = await PropertyService.findByIdAndRemove(req.params.id);
         if(!property)
-            return res.status(404).send({ error: "Property not found!" });
-        res.status(200).send("Successful property deleted!");
+            return res.status(400).send({ error: "Imóvel não encontrado!" });
+        res.status(200).send("Sucesso ao deletar Imóvel!");
     } catch(err){
-        return res.status(500).send({ 
+        return res.status(400).send({ 
             error: {
                 name: err.name,
                 description: err.message,
-                message: "Failed to delete property!"
+                message: "Falha ao deletar Imóvel!"
             }
         });
     }
 });
 
-router.put('/update/:id', async (req, res) => {
+router.patch('/update/:id', async (req, res) => {
     try {
-        req.body.updatedAt = Date.now();
-        const property = await Property.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        const property = await PropertyService.findByIdAndUpdate(req, { new: true, runValidators: true });
         if (!property)
-            return res.status(404).send({ error: "Property not found!" });
+            return res.status(400).send({ error: "Imóvel não encontrado!" });
         res.status(200).send(property);
     } catch(err){
-        return res.status(500).send({ 
+        return res.status(400).send({ 
             error: {
                 name: err.name,
                 description: err.message,
-                message: "Failed to update property!"
+                message: "Falha ao atualizar Imóvel!"
             }
         });
     }

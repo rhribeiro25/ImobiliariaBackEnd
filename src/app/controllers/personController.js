@@ -1,8 +1,8 @@
 const express = require('express');
-const authMiddleware = require("../../middlewares/auth");
-const PersonService = require("../services/personService")
+const PersonService = require("../services/personService");
+const authSecurity = require("../../security/auth");
 const routerAuth = express.Router();
-routerAuth.use(authMiddleware);
+routerAuth.use(authSecurity);
 
 routerAuth.post('/create', async (req, res) => {
     try {
@@ -47,7 +47,7 @@ routerAuth.get('/show/:id', async (req, res) => {
             error: {
                 name: error.name,
                 description: error.message,
-                message: "Falha na busca pessoa!"
+                message: "Falha ao localizar pessoa!"
             }
         });
     }
@@ -76,7 +76,7 @@ routerAuth.patch('/update/:id', async (req, res) => {
         if (person)
             res.status(status).send({ person });
         else
-            res.status(status).send({ error: { message: "Impossível alterar os documentos CPF ou CNPJ!" } })
+            res.status(status).send({ error: { message: "Impossível alterar os documentos CPF ou CNPJ!" } });
     } catch (error) {
         return res.status(400).send({
             error: {

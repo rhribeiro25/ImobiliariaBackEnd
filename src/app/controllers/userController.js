@@ -1,9 +1,9 @@
 const express = require('express');
-const authMiddleware = require("../../middlewares/auth");
 const UserService = require('../services/userService');
 const router = express.Router();
+const authSecurity = require("../../security/auth");
 const routerAuth = express.Router();
-routerAuth.use(authMiddleware);
+routerAuth.use(authSecurity);
 
 router.post('/create', async (req, res) => {
     try {
@@ -52,7 +52,7 @@ routerAuth.get('/show/:id', async (req, res) => {
             error: {
                 name: error.name,
                 description: error.message,
-                message: "Falha na busca de usuário!"
+                message: "Falha ao localizar usuário!"
             }
         });
     }

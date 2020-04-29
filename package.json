@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/app/index.js"
   },
   "author": "",
   "license": "ISC",
@@ -14,7 +15,10 @@
     "core-util-is": "^1.0.2",
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "express-mongo-sanitize": "^2.0.0",
+    "express-rate-limit": "^5.1.1",
     "fs": "0.0.1-security",
+    "helmet": "^3.22.0",
     "jsonwebtoken": "^8.5.1",
     "mongo": "^0.1.0",
     "mongodb": "^3.5.6",

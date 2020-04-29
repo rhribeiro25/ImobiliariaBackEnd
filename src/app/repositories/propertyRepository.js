@@ -1,25 +1,29 @@
-const Person = require('../models/personModel');
+const Property = require('../models/propertyModel');
 
-exports.create = async function (newPerson, crBy) {
-    return await Person.create({ ...newPerson, crBy });
-}
-
-exports.findByDoc = async function (doc) {
-    return await Person.findOne({ "docs.num": doc.num });
+exports.create = async function (newProperty, crBy) {
+    return await Property.create({ ...newProperty, crBy });
 }
 
 exports.findAllPopulateRelations = async function (relations) {
-    return await Person.find().populate([relations]);
+    return await Property.find().populate([relations]);
 }
 
 exports.findByIdPopulateRelations = async function (id, relations) {
-    return await Person.findById(id).populate([relations]);
+    return await Property.findById(id).populate([relations]);
 }
 
 exports.findByIdAndRemove = async function (id) {
-    return await Person.findByIdAndRemove(id);
+    return await Property.findByIdAndRemove(id);
 }
 
-exports.findByIdAndUpdate = async function (id, newPerson, actionsJson) {
-    return await Person.findByIdAndUpdate(id, newPerson, actionsJson);
+exports.findByIdAndUpdate = async function (id, newProperty, actionsJson) {
+    return await Property.findByIdAndUpdate(id, newProperty, actionsJson);
+}
+
+exports.remove = async function (id) {
+    return await Person.remove(id);
+}
+
+exports.updateOne = async function (id, newPerson, actionsJson) {
+    return await Person.updateOne(id, newPerson, actionsJson);
 }

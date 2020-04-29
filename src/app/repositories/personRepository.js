@@ -23,3 +23,11 @@ exports.findByIdAndRemove = async function (id) {
 exports.findByIdAndUpdate = async function (id, newPerson, actionsJson) {
     return await Person.findByIdAndUpdate(id, newPerson, actionsJson);
 }
+
+exports.remove = async function (id) {
+    return await Person.remove(id);
+}
+
+exports.updateOne = async function (id, newPerson, actionsJson) {
+    return await Person.updateOne(id, newPerson, actionsJson);
+}
