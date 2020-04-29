@@ -5,7 +5,7 @@ const hbs = require("nodemailer-express-handlebars");
 const mailer = require("../../modules/mailer");
 const jwt = require("jsonwebtoken");
 const authConfig = require("../../config/auth");
-const { mailOptions, hbsOptions } = require("../../config/mail_forgot_password.json");
+const { mailOptions, hbsOptions } = require("../../config/mailForgotPassword.json");
 
 exports.create = async function (req) {
     let newUser = req.body;
