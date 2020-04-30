@@ -9,11 +9,11 @@ exports.findByDoc = async function (doc) {
 }
 
 exports.findAllPopulateRelations = async function (relations) {
-    return await Person.find().populate([relations]);
+    return await Person.find().populate(relations);
 }
 
 exports.findByIdPopulateRelations = async function (id, relations) {
-    return await Person.findById(id).populate([relations]);
+    return await Person.findById(id).populate(relations);
 }
 
 exports.findByIdAndRemove = async function (id) {
@@ -24,8 +24,8 @@ exports.findByIdAndUpdate = async function (id, newPerson, actionsJson) {
     return await Person.findByIdAndUpdate(id, newPerson, actionsJson);
 }
 
-exports.remove = async function (id) {
-    return await Person.remove(id);
+exports.remove = async function (conditions) {
+    return await Person.remove(conditions);
 }
 
 exports.updateOne = async function (id, newPerson, actionsJson) {

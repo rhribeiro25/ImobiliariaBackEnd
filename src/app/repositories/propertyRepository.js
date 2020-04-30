@@ -5,11 +5,11 @@ exports.create = async function (newProperty, crBy) {
 }
 
 exports.findAllPopulateRelations = async function (relations) {
-    return await Property.find().populate([relations]);
+    return await Property.find().populate(relations);
 }
 
 exports.findByIdPopulateRelations = async function (id, relations) {
-    return await Property.findById(id).populate([relations]);
+    return await Property.findById(id).populate(relations);
 }
 
 exports.findByIdAndRemove = async function (id) {
@@ -20,8 +20,8 @@ exports.findByIdAndUpdate = async function (id, newProperty, actionsJson) {
     return await Property.findByIdAndUpdate(id, newProperty, actionsJson);
 }
 
-exports.remove = async function (id) {
-    return await Person.remove(id);
+exports.remove = async function (conditions) {
+    return await Person.remove(conditions);
 }
 
 exports.updateOne = async function (id, newPerson, actionsJson) {

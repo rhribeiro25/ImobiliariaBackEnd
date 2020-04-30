@@ -2,8 +2,8 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var contractSchema = new Schema({
-    startDate: Date,
-    finishDate: Date,
+    started: Date,
+    finished: Date,
     people: [{
         type: Schema.Types.ObjectId, 
         ref: "Person",
@@ -12,15 +12,15 @@ var contractSchema = new Schema({
         type: Schema.Types.ObjectId, 
         ref: "Property",
     },
-    user: {
+    crBy: {
         type: Schema.Types.ObjectId, 
         ref: "User"
     },
-    createdAt: {
+    crAt: {
         type: Date,
         default: Date.now
     },
-    updatedAt: {
+    upAt: {
         type: Date,
     }
 }, { versionKey: false });

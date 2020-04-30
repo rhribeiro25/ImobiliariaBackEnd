@@ -1,23 +1,19 @@
 const ContractRepository = require('../repositories/contractRepository');
 const PersonRepository = require('../repositories/personRepository');
 const PropertyRepository = require('../repositories/propertyRepository');
-const Person = require('../models/personModel');
-const Contract = require('../models/contractModel');
-const Property = require('../models/propertyModel');
 
 exports.create = async function (req) {
-    const { startDate, finishDate, people, property } = req.body;
-    const contract = await ContractRepository.create({ startDate, finishDate, user: req.userId });
-    await Promise.all(people.map(async contract => {
-        const personContract = new Contract({ ...person, contract: contract.id });
-        await PersonRepository.create(personContract);
-        contract.people.push(personContract);
+    const { body, userId } = req;
+    let { started, finished, people, property } = body;
+    let contract = await ContractRepository.create({ started, finished }, userId);
+    await Promise.all(people.map(async person => {
+        let newPerson = await PersonRepository.create(person, userId);
+        contract.people.push(newPerson._id);
     }));
-    const propertyContract = new Property({ ...property, contract: contract.id });
-    await PropertyRepository.create(propertyContract);
-    contract.property = propertyContract;
-    await ContractRepository.updateOne(contract._id, contract, {});
-    return contract;
+    property.contract = contract._id;
+    let newProperty = await PropertyRepository.create(property, userId);
+    contract.property = newProperty._id;
+    return await ContractRepository.findByIdAndUpdate(contract._id, contract, { new: true, runValidators: true });
 }
 
 exports.findAllPopulateRelations = async function (relations) {
@@ -33,35 +29,33 @@ exports.findByIdAndRemove = async function (id) {
 }
 
 exports.findByIdAndUpdate = async function (req, actionsJson) {
-    req.body.updatedAt = Date.now();
-    const { startDate, finishDate, people, property } = req.body;
-    let newContract = await ContractRepository.findByIdAndUpdate(req.params.id, {
-        startDate,
-        finishDate,
-        user: req.userId
+    let updatedContract;
+    let { started, finished, people, property } = req.body;
+    let existsContract = await ContractRepository.findByIdAndUpdate(req.params.id, {
+        started,
+        finished,
+        upAt: Date.now(),
+        crBy: req.userId
     }, { new: true, runValidators: true });
-    let status;
-    if (newContract) {
-        if(people && people.length > 0){
-            newContract.people = [];
-            await PersonRepository.remove(newContract._id);
-            await Promise.all(people.map(async person => {
-                const personContract = new Person({ ...person, contract: newContract.id });
-                personContract.updatedAt = Date.now();
-                await PersonRepository.create(personContract);
-                newContract.people.push(personContract);
-            }));
-        }
-        if(property){
-            await PropertyRepository.remove(newContract._id);
-            const propertyContract = new Property({ ...property, contract: newContract.id });
-            propertyContract.updatedAt = Date.now();
-            await PropertyRepository.create(propertyContract);
-            newContract.property = propertyContract;
-        }
-    } else
-        status = 400;
-        UserRepository.findByIdAndUpdate(req.params.id, { $set: newUser }, actionsJson);
-        const updatedContract = await ContractRepository.findByIdAndUpdate(newContract._id, { $set: newContract }, actionsJson);
-    return { status, contract: updatedContract };
+    if (!existsContract) {
+        return { status: 400, contract: existsContract };
+    } 
+    if(people && people.length > 0){
+        existsContract.people = [];
+        await Promise.all(people.map(async person => {
+            person.contract = existsContract._id;
+            person.updatedAt = Date.now();
+            const updatedPerson = await PersonRepository.create(person, req.userId);
+            existsContract.people.push(updatedPerson);
+        }));
+    }
+    if(property){
+        await PropertyRepository.findByIdAndRemove(existsContract.property._id);
+        property.contract = existsContract._id;
+        property.updatedAt = Date.now();
+        let updatedProperty = await PropertyRepository.create(property);
+        existsContract.property = updatedProperty._id;
+        updatedContract = await ContractRepository.findByIdAndUpdate(req.params.id, { $set: existsContract }, actionsJson);
+    }
+    return { status: 200, contract: updatedContract };
 }

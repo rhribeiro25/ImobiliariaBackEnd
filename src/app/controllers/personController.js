@@ -21,7 +21,7 @@ routerAuth.post('/create', async (req, res) => {
 
 routerAuth.get('/list', async (req, res) => {
     try {
-        const people = await PersonService.findAllPopulateRelations("crBy");
+        const people = await PersonService.findAllPopulateRelations(["crBy"]);
         if (!people)
             return res.status(400).send({ error: { message: "Pessoas não encontradas!" } });
         return res.status(200).send(people);
@@ -38,7 +38,7 @@ routerAuth.get('/list', async (req, res) => {
 
 routerAuth.get('/show/:id', async (req, res) => {
     try {
-        const person = await PersonService.findByIdPopulateRelations(req.params.id, "crBy");
+        const person = await PersonService.findByIdPopulateRelations(req.params.id, ["crBy"]);
         if (!person)
             return res.status(400).send({ error: { message: "Pessoa não encontrada!" } });
         res.status(200).send(person);

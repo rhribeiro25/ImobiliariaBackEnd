@@ -5,19 +5,19 @@ exports.create = async function (newContract, crBy) {
 }
 
 exports.findAllPopulateRelations = async function (relations) {
-    return await Contract.find().populate([relations]);
+    return await Contract.find().populate(relations);
 }
 
 exports.findByIdPopulateRelations = async function (id, relations) {
-    return await Contract.findById(id).populate([relations]);
+    return await Contract.findById(id).populate(relations);
 }
 
 exports.findByIdAndRemove = async function (id) {
     return await Contract.findByIdAndRemove(id);
 }
 
-exports.remove = async function (id) {
-    return await Contract.remove(id);
+exports.remove = async function (conditions ) {
+    return await Contract.remove(conditions );
 }
 
 exports.findByIdAndUpdate = async function (id, newContract, actionsJson) {
