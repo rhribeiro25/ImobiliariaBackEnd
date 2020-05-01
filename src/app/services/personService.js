@@ -1,56 +1,56 @@
 const PersonRepository = require('../repositories/personRepository');
+const MongooseSchema = require('../models/personModel');
+const PersonRepositoryImpl = new PersonRepository(MongooseSchema);
+const GenericService = require('./genericService');
 
-exports.create = async function (req) {
-    const { body, userId } = req;
-    let newPerson = body;
-    let existsPerson = await this.findByDoc(newPerson.docs);
-    let person;
-    let status;
-    if (existsPerson) {
-        person = await PersonRepository.findByIdAndUpdate(existsPerson._id, newPerson, { new: true, runValidators: true });
-        status = 200;
+class PersonService extends GenericService {
+
+    constructor() {
+        super(PersonRepositoryImpl);
     }
-    else {
-        person = await PersonRepository.create(newPerson, userId);
-        status = 201;
+
+    create = async function (req) {
+        const { body, userId } = req;
+        let newPerson = body;
+        let existsPerson = await this.findByDoc(newPerson.docs);
+        let person;
+        let status;
+        if (existsPerson) {
+            person = await PersonRepositoryImpl.findByIdAndUpdate(existsPerson._id, newPerson, { new: true, runValidators: true });
+            status = 200;
+        }
+        else {
+            person = await PersonRepositoryImpl.create(newPerson, userId);
+            status = 201;
+        }
+        return { status, person };
     }
-    return { status, person };
-}
 
-exports.findByDoc = async function (docs) {
-    let existsDoc;
-    await Promise.all(docs.map(async doc => {
-        if (doc.typeVal === "CPF" || doc.typeVal === "CNPJ")
-            existsDoc = doc;
-    }));
-    return await PersonRepository.findByDoc(existsDoc);
-}
-
-exports.findAllPopulateRelations = async function (relations) {
-    return await PersonRepository.findAllPopulateRelations(relations);
-}
-
-exports.findByIdPopulateRelations = async function (id, relations) {
-    return await PersonRepository.findByIdPopulateRelations(id, relations);
-}
-
-exports.findByIdAndRemove = async function (id) {
-    return await PersonRepository.findByIdAndRemove(id);
-}
-
-exports.findByIdAndUpdate = async function (req, actionsJson) {
-    const { body } = req;
-    let newPerson = body;
-    let existsPerson = await this.findByDoc(newPerson.docs);
-    let updatedPerson;
-    let status;
-    if (existsPerson) {
-        newPerson.upAt = Date.now();
-        updatedPerson = await PersonRepository.findByIdAndUpdate(req.params.id, { $set: newPerson }, actionsJson);
-        status = 200;
+    findByDoc = async function (docs) {
+        let existsDoc;
+        await Promise.all(docs.map(async doc => {
+            if (doc.typeVal === "CPF" || doc.typeVal === "CNPJ")
+                existsDoc = doc;
+        }));
+        return await PersonRepositoryImpl.findByDoc(existsDoc);
     }
-    else {
-        status = 400;
+
+    findByIdAndUpdate = async function (req, actionsJson) {
+        const { body } = req;
+        let newPerson = body;
+        let existsPerson = await this.findByDoc(newPerson.docs);
+        let updatedPerson;
+        let status;
+        if (existsPerson) {
+            newPerson.upAt = Date.now();
+            updatedPerson = await PersonRepositoryImpl.findByIdAndUpdate(req.params.id, { $set: newPerson }, actionsJson);
+            status = 200;
+        }
+        else {
+            status = 400;
+        }
+        return { status, person: updatedPerson };
     }
-    return { status, person: updatedPerson };
 }
+
+module.exports = PersonService;

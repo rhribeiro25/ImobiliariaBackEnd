@@ -1,12 +1,13 @@
 const express = require('express');
 const PersonService = require("../services/personService");
+const PersonServiceImpl = new PersonService();
 const authSecurity = require("../../security/auth");
 const routerAuth = express.Router();
 routerAuth.use(authSecurity);
 
 routerAuth.post('/create', async (req, res) => {
     try {
-        let { status, person } = await PersonService.create(req);
+        let { status, person } = await PersonServiceImpl.create(req);
         res.status(status).send({ person });
     } catch (error) {
         return res.status(400).send({
@@ -21,7 +22,7 @@ routerAuth.post('/create', async (req, res) => {
 
 routerAuth.get('/list', async (req, res) => {
     try {
-        const people = await PersonService.findAllPopulateRelations(["crBy"]);
+        const people = await PersonServiceImpl.findAllPopulateRelations(["crBy"]);
         if (!people)
             return res.status(400).send({ error: { message: "Pessoas não encontradas!" } });
         return res.status(200).send(people);
@@ -38,7 +39,7 @@ routerAuth.get('/list', async (req, res) => {
 
 routerAuth.get('/show/:id', async (req, res) => {
     try {
-        const person = await PersonService.findByIdPopulateRelations(req.params.id, ["crBy"]);
+        const person = await PersonServiceImpl.findByIdPopulateRelations(req.params.id, ["crBy"]);
         if (!person)
             return res.status(400).send({ error: { message: "Pessoa não encontrada!" } });
         res.status(200).send(person);
@@ -55,7 +56,7 @@ routerAuth.get('/show/:id', async (req, res) => {
 
 routerAuth.delete('/delete/:id', async (req, res) => {
     try {
-        const person = await PersonService.findByIdAndRemove(req.params.id);
+        const person = await PersonServiceImpl.findByIdAndRemove(req.params.id);
         if (!person)
             return res.status(400).send({ error: { message: "Pessoa não encontrada!" } });
         res.status(200).send("Sucesso ao deletar pessoa!");
@@ -72,7 +73,7 @@ routerAuth.delete('/delete/:id', async (req, res) => {
 
 routerAuth.patch('/update/:id', async (req, res) => {
     try {
-        let { status, person } = await PersonService.findByIdAndUpdate(req, { new: true, runValidators: true });
+        let { status, person } = await PersonServiceImpl.findByIdAndUpdate(req, { new: true, runValidators: true });
         if (person)
             res.status(status).send({ person });
         else

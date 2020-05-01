@@ -1,10 +1,10 @@
 const express = require('express');
 const PropertyService = require('../services/propertyService');
 const authSecurity = require("../../security/auth");
-const router = express.Router();
-router.use(authSecurity);
+const routerAuth = express.Router();
+routerAuth.use(authSecurity);
 
-router.post('/create', async (req, res) => {
+routerAuth.post('/create', async (req, res) => {
     try {
         const property = await PropertyService.create(req);
         return res.status(201).send({ property });
@@ -19,7 +19,7 @@ router.post('/create', async (req, res) => {
     }
 });
 
-router.get('/list', async (req, res) => {
+routerAuth.get('/list', async (req, res) => {
     try {
         const properties = await PropertyService.findAllPopulateRelations(["crBy", "contract"]);
         if (!properties)
@@ -36,7 +36,7 @@ router.get('/list', async (req, res) => {
     }
 });
 
-router.get('/show/:id', async (req, res) => {
+routerAuth.get('/show/:id', async (req, res) => {
     try {
         const property = await PropertyService.findByIdPopulateRelations(req.params.id, ["crBy", "contract"]);
         if (!property)
@@ -53,7 +53,7 @@ router.get('/show/:id', async (req, res) => {
     }
 });
 
-router.delete('/delete/:id', async (req, res) => {
+routerAuth.delete('/delete/:id', async (req, res) => {
     try {
         const property = await PropertyService.findByIdAndRemove(req.params.id);
         if (!property)
@@ -70,7 +70,7 @@ router.delete('/delete/:id', async (req, res) => {
     }
 });
 
-router.patch('/update/:id', async (req, res) => {
+routerAuth.patch('/update/:id', async (req, res) => {
     try {
         const property = await PropertyService.findByIdAndUpdate(req, { new: true, runValidators: true });
         if (!property)
@@ -87,4 +87,4 @@ router.patch('/update/:id', async (req, res) => {
     }
 });
 
-module.exports = app => app.use('/property', router);
+module.exports = app => app.use('/property', routerAuth);

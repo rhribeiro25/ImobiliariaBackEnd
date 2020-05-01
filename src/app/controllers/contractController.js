@@ -1,10 +1,10 @@
 const express = require('express');
 const ContractService = require('../services/contractService');
 const authSecurity = require("../../security/auth");
-const router = express.Router();
-router.use(authSecurity);
+const routerAuth = express.Router();
+routerAuth.use(authSecurity);
 
-router.post('/create', async (req, res) => {
+routerAuth.post('/create', async (req, res) => {
     try {
         const contract = await ContractService.create(req);
         return res.status(201).send({ contract });
@@ -19,7 +19,7 @@ router.post('/create', async (req, res) => {
     }
 });
 
-router.get('/list', async (req, res) => {
+routerAuth.get('/list', async (req, res) => {
     try {
         const contracts = await ContractService.findAllPopulateRelations(["crBy", "people", "property"]);
         if (!contracts)
@@ -36,7 +36,7 @@ router.get('/list', async (req, res) => {
     }
 });
 
-router.get('/show/:id', async (req, res) => {
+routerAuth.get('/show/:id', async (req, res) => {
     try {
         const contract = await ContractService.findByIdPopulateRelations(req.params.id, ["crBy", "people", "property"]);
         if (!contract)
@@ -53,7 +53,7 @@ router.get('/show/:id', async (req, res) => {
     }
 });
 
-router.delete('/delete/:id', async (req, res) => {
+routerAuth.delete('/delete/:id', async (req, res) => {
     try {
         const contract = await ContractService.findByIdAndRemove(req.params.id);
         if (!contract)
@@ -70,7 +70,7 @@ router.delete('/delete/:id', async (req, res) => {
     }
 });
 
-router.put('/update/:id', async (req, res) => {
+routerAuth.patch('/update/:id', async (req, res) => {
     try {
         let { status, contract } = await ContractService.findByIdAndUpdate(req, { new: true, runValidators: true });
         if (contract)
@@ -88,4 +88,4 @@ router.put('/update/:id', async (req, res) => {
     }
 });
 
-module.exports = app => app.use('/contract', router);
+module.exports = app => app.use('/contract', routerAuth);
