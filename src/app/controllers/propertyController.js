@@ -1,12 +1,14 @@
-const express = require('express');
 const PropertyService = require('../services/propertyService');
+const PropertyServiceImpl = new PropertyService();
 const authSecurity = require("../../security/auth");
+const express = require('express');
 const routerAuth = express.Router();
 routerAuth.use(authSecurity);
 
 routerAuth.post('/create', async (req, res) => {
     try {
-        const property = await PropertyService.create(req);
+        PropertyServiceImpl.setRepository();
+        const property = await PropertyServiceImpl.create(req);
         return res.status(201).send({ property });
     } catch (error) {
         return res.status(400).send({
@@ -21,9 +23,10 @@ routerAuth.post('/create', async (req, res) => {
 
 routerAuth.get('/list', async (req, res) => {
     try {
-        const properties = await PropertyService.findAllPopulateRelations(["crBy", "contract"]);
+        PropertyServiceImpl.setRepository();
+        const properties = await PropertyServiceImpl.findAllPopulateRelations(["crBy", "contract"]);
         if (!properties)
-            return res.status(400).send({ error: "Imóvel não encontrado!" });
+            return res.status(400).send({ error: { message: "Imóvel não encontrado!" } });
         return res.status(200).send(properties);
     } catch (error) {
         return res.status(400).send({
@@ -38,9 +41,10 @@ routerAuth.get('/list', async (req, res) => {
 
 routerAuth.get('/show/:id', async (req, res) => {
     try {
-        const property = await PropertyService.findByIdPopulateRelations(req.params.id, ["crBy", "contract"]);
+        PropertyServiceImpl.setRepository();
+        const property = await PropertyServiceImpl.findByIdPopulateRelations(req.params.id, ["crBy", "contract"]);
         if (!property)
-            return res.status(400).send({ error: "Imóvel não encontrado!" });
+            return res.status(400).send({ error: { message: "Imóvel não encontrado!" } });
         res.status(200).send(property);
     } catch (error) {
         return res.status(400).send({
@@ -55,9 +59,10 @@ routerAuth.get('/show/:id', async (req, res) => {
 
 routerAuth.delete('/delete/:id', async (req, res) => {
     try {
-        const property = await PropertyService.findByIdAndRemove(req.params.id);
+        PropertyServiceImpl.setRepository();
+        const property = await PropertyServiceImpl.findByIdAndRemove(req.params.id);
         if (!property)
-            return res.status(400).send({ error: "Imóvel não encontrado!" });
+            return res.status(400).send({ error: { message: "Imóvel não encontrado!" } });
         res.status(200).send("Sucesso ao deletar Imóvel!");
     } catch (error) {
         return res.status(400).send({
@@ -72,9 +77,10 @@ routerAuth.delete('/delete/:id', async (req, res) => {
 
 routerAuth.patch('/update/:id', async (req, res) => {
     try {
-        const property = await PropertyService.findByIdAndUpdate(req, { new: true, runValidators: true });
+        PropertyServiceImpl.setRepository();
+        const property = await PropertyServiceImpl.findByIdAndUpdate(req, { new: true, runValidators: true });
         if (!property)
-            return res.status(400).send({ error: "Imóvel não encontrado!" });
+            return res.status(400).send({ error: { message: "Imóvel não encontrado!" } });
         res.status(200).send(property);
     } catch (error) {
         return res.status(400).send({

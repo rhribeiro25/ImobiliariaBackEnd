@@ -1,12 +1,14 @@
-const PersonRepository = require('../repositories/personRepository');
 const MongooseSchema = require('../models/personModel');
-const PersonRepositoryImpl = new PersonRepository(MongooseSchema);
 const GenericService = require('./genericService');
+const GenericServiceImpl = new GenericService();
+const PersonRepository = require('../repositories/personRepository');
+const PersonRepositoryImpl = new PersonRepository();
 
 class PersonService extends GenericService {
 
-    constructor() {
-        super(PersonRepositoryImpl);
+    setRepository = function () {
+        PersonRepositoryImpl.setSchema(MongooseSchema);
+        GenericServiceImpl.setRepository(PersonRepositoryImpl);
     }
 
     create = async function (req) {

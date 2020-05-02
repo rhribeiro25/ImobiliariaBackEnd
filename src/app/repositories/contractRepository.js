@@ -1,29 +1,14 @@
-const Contract = require('../models/contractModel');
+const GenericRepository = require('./genericRepository');
+const GenericRepositoryImpl = new GenericRepository();
+let MongooseSchema;
 
-exports.create = async function (newContract, crBy) {
-    return await Contract.create({ ...newContract, crBy });
+class ContractRepository extends GenericRepository {
+
+    setSchema = function (Schema) {
+        MongooseSchema = Schema;
+        GenericRepositoryImpl.setSchema(Schema);
+    }
+    
 }
 
-exports.findAllPopulateRelations = async function (relations) {
-    return await Contract.find().populate(relations);
-}
-
-exports.findByIdPopulateRelations = async function (id, relations) {
-    return await Contract.findById(id).populate(relations);
-}
-
-exports.findByIdAndRemove = async function (id) {
-    return await Contract.findByIdAndRemove(id);
-}
-
-exports.remove = async function (conditions ) {
-    return await Contract.remove(conditions );
-}
-
-exports.findByIdAndUpdate = async function (id, newContract, actionsJson) {
-    return await Contract.findByIdAndUpdate(id, newContract, actionsJson);
-}
-
-exports.updateOne = async function (id, newContract, actionsJson) {
-    return await Contract.updateOne(id, newContract, actionsJson);
-}
+module.exports = ContractRepository;

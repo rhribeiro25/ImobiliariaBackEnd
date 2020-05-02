@@ -1,12 +1,13 @@
-const express = require('express');
 const PersonService = require("../services/personService");
 const PersonServiceImpl = new PersonService();
 const authSecurity = require("../../security/auth");
+const express = require('express');
 const routerAuth = express.Router();
 routerAuth.use(authSecurity);
 
 routerAuth.post('/create', async (req, res) => {
     try {
+        PersonServiceImpl.setRepository();
         let { status, person } = await PersonServiceImpl.create(req);
         res.status(status).send({ person });
     } catch (error) {
@@ -22,6 +23,7 @@ routerAuth.post('/create', async (req, res) => {
 
 routerAuth.get('/list', async (req, res) => {
     try {
+        PersonServiceImpl.setRepository();
         const people = await PersonServiceImpl.findAllPopulateRelations(["crBy"]);
         if (!people)
             return res.status(400).send({ error: { message: "Pessoas não encontradas!" } });
@@ -39,6 +41,7 @@ routerAuth.get('/list', async (req, res) => {
 
 routerAuth.get('/show/:id', async (req, res) => {
     try {
+        PersonServiceImpl.setRepository();
         const person = await PersonServiceImpl.findByIdPopulateRelations(req.params.id, ["crBy"]);
         if (!person)
             return res.status(400).send({ error: { message: "Pessoa não encontrada!" } });
@@ -56,6 +59,7 @@ routerAuth.get('/show/:id', async (req, res) => {
 
 routerAuth.delete('/delete/:id', async (req, res) => {
     try {
+        PersonServiceImpl.setRepository();
         const person = await PersonServiceImpl.findByIdAndRemove(req.params.id);
         if (!person)
             return res.status(400).send({ error: { message: "Pessoa não encontrada!" } });
@@ -73,6 +77,7 @@ routerAuth.delete('/delete/:id', async (req, res) => {
 
 routerAuth.patch('/update/:id', async (req, res) => {
     try {
+        PersonServiceImpl.setRepository();
         let { status, person } = await PersonServiceImpl.findByIdAndUpdate(req, { new: true, runValidators: true });
         if (person)
             res.status(status).send({ person });

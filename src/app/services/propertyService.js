@@ -1,24 +1,26 @@
+const MongooseSchema = require('../models/propertyModel');
+const GenericService = require('./genericService');
+const GenericServiceImpl = new GenericService();
 const PropertyRepository = require('../repositories/propertyRepository');
+const PropertyRepositoryImpl = new PropertyRepository();
 
-exports.create = async function (req) {
-    const { body, userId } = req;
-    return property = await PropertyRepository.create(body, userId);
-}
+class PropertyService extends GenericService {
 
-exports.findAllPopulateRelations = async function (relations) {
-    return await PropertyRepository.findAllPopulateRelations(relations);
-}
+    setRepository = function () {
+        PropertyRepositoryImpl.setSchema(MongooseSchema);
+        GenericServiceImpl.setRepository(PropertyRepositoryImpl);
+    }
 
-exports.findByIdPopulateRelations = async function (id, relations) {
-    return await PropertyRepository.findByIdPopulateRelations(id, relations);
-}
+    create = async function (req) {
+        const { body, userId } = req;
+        return await PropertyRepositoryImpl.create(body, userId);
+    }
 
-exports.findByIdAndRemove = async function (id) {
-    return await PropertyRepository.findByIdAndRemove(id);
-}
+    findByIdAndUpdate = async function (req, actionsJson) {
+        let newProperty = req.body;
+        newProperty.upAt = Date.now();
+        return await PropertyRepositoryImpl.findByIdAndUpdate(req.params.id, { $set: newProperty }, actionsJson);
+    }
+} 
 
-exports.findByIdAndUpdate = async function (req, actionsJson) {
-    let newProperty = req.body;
-    newProperty.upAt = Date.now();
-    return await PropertyRepository.findByIdAndUpdate(req.params.id, { $set: newProperty }, actionsJson);
-}
+module.exports = PropertyService;

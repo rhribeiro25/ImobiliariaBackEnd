@@ -1,61 +1,85 @@
-const ContractRepository = require('../repositories/contractRepository');
+const MongooseSchemaPerson = require('../models/personModel');
+const MongooseSchemaProperty = require('../models/propertyModel');
+const MongooseSchemaContract = require('../models/contractModel');
+const GenericService = require('./genericService');
+let GenericServiceImpl = new GenericService();
 const PersonRepository = require('../repositories/personRepository');
+let PersonRepositoryImpl = new PersonRepository();
 const PropertyRepository = require('../repositories/propertyRepository');
+let PropertyRepositoryImpl = new PropertyRepository();
+const ContractRepository = require('../repositories/contractRepository');
+let ContractRepositoryImpl = new ContractRepository();
 
-exports.create = async function (req) {
-    const { body, userId } = req;
-    let { started, finished, people, property } = body;
-    let contract = await ContractRepository.create({ started, finished }, userId);
-    await Promise.all(people.map(async person => {
-        let newPerson = await PersonRepository.create(person, userId);
-        contract.people.push(newPerson._id);
-    }));
-    property.contract = contract._id;
-    let newProperty = await PropertyRepository.create(property, userId);
-    contract.property = newProperty._id;
-    return await ContractRepository.findByIdAndUpdate(contract._id, contract, { new: true, runValidators: true });
-}
+class ContractService extends GenericService {
 
-exports.findAllPopulateRelations = async function (relations) {
-    return await ContractRepository.findAllPopulateRelations(relations);
-}
+    setRepository = function () {
+        ContractRepositoryImpl.setSchema(MongooseSchemaContract);
+        GenericServiceImpl.setRepository(ContractRepositoryImpl);
+    }
 
-exports.findByIdPopulateRelations = async function (id, relations) {
-    return await ContractRepository.findByIdPopulateRelations(id, relations);
-}
+    setPropertyRepository = function () {
+        PropertyRepositoryImpl.setSchema(MongooseSchemaProperty);
+        GenericServiceImpl.setRepository(PropertyRepositoryImpl);
+    }
 
-exports.findByIdAndRemove = async function (id) {
-    return await ContractRepository.findByIdAndRemove(id);
-}
+    setPersonRepository = function () {
+        PersonRepositoryImpl.setSchema(MongooseSchemaPerson);
+        GenericServiceImpl.setRepository(PersonRepositoryImpl);
+    }
 
-exports.findByIdAndUpdate = async function (req, actionsJson) {
-    let updatedContract;
-    let { started, finished, people, property } = req.body;
-    let existsContract = await ContractRepository.findByIdAndUpdate(req.params.id, {
-        started,
-        finished,
-        upAt: Date.now(),
-        crBy: req.userId
-    }, { new: true, runValidators: true });
-    if (!existsContract) {
-        return { status: 400, contract: existsContract };
-    } 
-    if(people && people.length > 0){
-        existsContract.people = [];
+    create = async function (req) {
+        const { body, userId } = req;
+        let { started, finished, people, property } = body;
+        let contract = await ContractRepositoryImpl.create({ started, finished }, userId);
+        this.setPersonRepository();
         await Promise.all(people.map(async person => {
-            person.contract = existsContract._id;
-            person.updatedAt = Date.now();
-            const updatedPerson = await PersonRepository.create(person, req.userId);
-            existsContract.people.push(updatedPerson);
+            let newPerson = await PersonRepositoryImpl.create(person, userId);
+            contract.people.push(newPerson._id);
         }));
+        this.setPropertyRepository();
+        property.contract = contract._id;
+        let newProperty = await PropertyRepositoryImpl.create(property, userId);
+        contract.property = newProperty._id;
+        this.setRepository();
+        return await ContractRepositoryImpl.findByIdAndUpdate(contract._id, contract, { new: true, runValidators: true });
     }
-    if(property){
-        await PropertyRepository.findByIdAndRemove(existsContract.property._id);
-        property.contract = existsContract._id;
-        property.updatedAt = Date.now();
-        let updatedProperty = await PropertyRepository.create(property);
-        existsContract.property = updatedProperty._id;
-        updatedContract = await ContractRepository.findByIdAndUpdate(req.params.id, { $set: existsContract }, actionsJson);
+
+    findByIdAndUpdate = async function (req, actionsJson) {
+        let updatedContract;
+        let { started, finished, people, property } = req.body;
+        let existsContract = await ContractRepositoryImpl.findByIdAndUpdate(req.params.id, {
+            started,
+            finished,
+            upAt: Date.now(),
+            crBy: req.userId
+        }, { new: true, runValidators: true });
+
+        if (!existsContract)
+            return { status: 400, contract: existsContract };
+
+        if (people && people.length > 0) {
+            existsContract.people = [];
+            this.setPersonRepository();
+            await Promise.all(people.map(async person => {
+                person.contract = existsContract._id;
+                person.updatedAt = Date.now();
+                const updatedPerson = await PersonRepositoryImpl.create(person, req.userId);
+                existsContract.people.push(updatedPerson);
+            }));
+        }
+        if (property) {
+            this.setPropertyRepository();
+            await PropertyRepositoryImpl.findByIdAndRemove(existsContract.property._id);
+            property.contract = existsContract._id;
+            property.updatedAt = Date.now();
+            let updatedProperty = await PropertyRepositoryImpl.create(property);
+            existsContract.property = updatedProperty._id;
+
+            this.setRepository();
+            updatedContract = await ContractRepositoryImpl.findByIdAndUpdate(req.params.id, { $set: existsContract }, actionsJson);
+        }
+        return { status: 200, contract: updatedContract };
     }
-    return { status: 200, contract: updatedContract };
 }
+
+module.exports = ContractService;

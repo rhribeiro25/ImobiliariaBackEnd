@@ -1,12 +1,14 @@
-const express = require('express');
 const ContractService = require('../services/contractService');
+const ContractServiceImpl = new ContractService();
 const authSecurity = require("../../security/auth");
+const express = require('express');
 const routerAuth = express.Router();
 routerAuth.use(authSecurity);
 
 routerAuth.post('/create', async (req, res) => {
     try {
-        const contract = await ContractService.create(req);
+        ContractServiceImpl.setRepository();
+        const contract = await ContractServiceImpl.create(req);
         return res.status(201).send({ contract });
     } catch (error) {
         return res.status(400).send({
@@ -21,9 +23,10 @@ routerAuth.post('/create', async (req, res) => {
 
 routerAuth.get('/list', async (req, res) => {
     try {
-        const contracts = await ContractService.findAllPopulateRelations(["crBy", "people", "property"]);
+        ContractServiceImpl.setRepository();
+        const contracts = await ContractServiceImpl.findAllPopulateRelations(["crBy", "people", "property"]);
         if (!contracts)
-            return res.status(400).send({ error: { message: "Contracts not found!" } });
+            return res.status(400).send({ error: { message: "Contratos não encontrada!" } });
         return res.status(200).send(contracts);
     } catch (error) {
         return res.status(400).send({
@@ -38,9 +41,10 @@ routerAuth.get('/list', async (req, res) => {
 
 routerAuth.get('/show/:id', async (req, res) => {
     try {
-        const contract = await ContractService.findByIdPopulateRelations(req.params.id, ["crBy", "people", "property"]);
+        ContractServiceImpl.setRepository();
+        const contract = await ContractServiceImpl.findByIdPopulateRelations(req.params.id, ["crBy", "people", "property"]);
         if (!contract)
-            return res.status(400).send({ error: { message: "Contract not found!" } });
+            return res.status(400).send({ error: { message: "Contrato não encontrado!" } });
         res.status(200).send(contract);
     } catch (error) {
         return res.status(400).send({
@@ -55,10 +59,11 @@ routerAuth.get('/show/:id', async (req, res) => {
 
 routerAuth.delete('/delete/:id', async (req, res) => {
     try {
-        const contract = await ContractService.findByIdAndRemove(req.params.id);
+        ContractServiceImpl.setRepository();
+        const contract = await ContractServiceImpl.findByIdAndRemove(req.params.id);
         if (!contract)
-            return res.status(400).send({ error: { message: "Contract not found!" } });
-        res.status(200).send("Successful contract deleted!");
+            return res.status(400).send({ error: { message: "Contrato não encontrado!" } });
+        res.status(200).send("Sucesso ao deletar contrato!");
     } catch (error) {
         return res.status(400).send({
             error: {
@@ -72,7 +77,8 @@ routerAuth.delete('/delete/:id', async (req, res) => {
 
 routerAuth.patch('/update/:id', async (req, res) => {
     try {
-        let { status, contract } = await ContractService.findByIdAndUpdate(req, { new: true, runValidators: true });
+        ContractServiceImpl.setRepository();
+        let { status, contract } = await ContractServiceImpl.findByIdAndUpdate(req, { new: true, runValidators: true });
         if (contract)
             res.status(status).send({ contract });
         else

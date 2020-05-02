@@ -1,11 +1,12 @@
 const GenericRepository = require('./genericRepository');
+const GenericRepositoryImpl = new GenericRepository();
 let MongooseSchema;
 
 class PersonRepository extends GenericRepository {
 
-    constructor(Schema) {
+    setSchema = function (Schema) {
         MongooseSchema = Schema;
-        super(Schema);
+        GenericRepositoryImpl.setSchema(Schema);
     }
 
     findByDoc = async function (doc) {
