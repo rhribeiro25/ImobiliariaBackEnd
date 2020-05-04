@@ -1,5 +1,6 @@
 import  GenericRepository from  './GenericRepository';
 import { Model, Document } from 'mongoose';
+import { UserInterface } from '@interfaces/UserInterface';
 
 class UserRepository extends GenericRepository {
 
@@ -7,11 +8,11 @@ class UserRepository extends GenericRepository {
         super(schema);
     }
 
-    public create = async function (newUser: Model<Document>) {
+    public async create (newUser: UserInterface) {
         return await super.mongooseSchema.create(newUser);
     }
 
-    public findByMail = async function (email: string, selectAttributes: string) {
+    public async findByMail (email: string, selectAttributes: string) {
         return await super.mongooseSchema.findOne({ email }).select(selectAttributes);
     }
 }

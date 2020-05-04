@@ -1,9 +1,8 @@
-import { Router } from 'express';
+import express, { Router } from 'express';
+import authSecurity from "@security/auth";
+const routerUn: Router = express.Router();
+const routerAu = express.Router();
+routerAu.use(authSecurity);
 
-const router = Router();
-
-const authSecurity = require("@security/auth");
-const routerAuth = Router();
-routerAuth.use(authSecurity);
-
-export default [router, routerAuth]
+export const routerUnsafe = routerUn;
+export const routerAuth = routerAu;

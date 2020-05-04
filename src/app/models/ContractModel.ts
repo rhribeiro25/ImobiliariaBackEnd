@@ -1,15 +1,5 @@
-import Mongoose, { Document, Schema } from "mongoose";
-import { PropertyInterface } from "./PropertyModel";
-import { UserInterface } from "./UserModel";
-import { PersonInterface } from "./PersonModel";
-
-export interface ContractInterface extends Document {
-  started: Date;
-  finished: Date;
-  people: [PersonInterface];
-  property: PropertyInterface;
-  crBy: UserInterface;
-};
+import { Schema, model } from "mongoose";
+import { ContractInterface } from "@interfaces/ContractInterface";
 
 var contractSchema = new Schema(
   {
@@ -46,4 +36,4 @@ contractSchema.methods.constructor = function (started: Date, finished: Date, cr
   return contractSchema;
 };
 
-export default Mongoose.model<ContractInterface>("Contract", contractSchema);
+export default model<ContractInterface>("Contract", contractSchema);

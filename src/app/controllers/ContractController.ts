@@ -1,10 +1,11 @@
-import UserService from '@services/contractService'
-
+import ContractService from '@services/ContractService';
+import app from 'app/app';
+import { routerAuth } from '@configs/router/routes';
+const contractService = ContractService.getInstance();
 
 routerAuth.post('/create', async (req, res) => {
     try {
-        ContractServiceImpl.setRepository();
-        const contract = await ContractServiceImpl.create(req);
+        const contract = await contractService.create(req.body, req.userId);
         return res.status(201).send({ contract });
     } catch (error) {
         return res.status(400).send({
@@ -17,10 +18,9 @@ routerAuth.post('/create', async (req, res) => {
     }
 });
 
-public async list (req: Request, res: Response): Promise<Response> {
+routerAuth.get('/list', async (req, res) => {
     try {
-        ContractServiceImpl.setRepository();
-        const contracts = await ContractServiceImpl.findAllPopulateRelations(["crBy", "people", "property"]);
+        const contracts = await contractService.findAllPopulateRelations(["crBy", "people", "property"]);
         if (!contracts)
             return res.status(400).send({ error: { message: "Contratos não encontrada!" } });
         return res.status(200).send(contracts);
@@ -35,10 +35,9 @@ public async list (req: Request, res: Response): Promise<Response> {
     }
 });
 
-public async show (req: Request, res: Response): Promise<Response> {
+routerAuth.get('/show/:id', async (req, res) => {
     try {
-        ContractServiceImpl.setRepository();
-        const contract = await ContractServiceImpl.findByIdPopulateRelations(req.params.id, ["crBy", "people", "property"]);
+        const contract = await contractService.findByIdPopulateRelations(req.params.id, ["crBy", "people", "property"]);
         if (!contract)
             return res.status(400).send({ error: { message: "Contrato não encontrado!" } });
         res.status(200).send(contract);
@@ -53,10 +52,9 @@ public async show (req: Request, res: Response): Promise<Response> {
     }
 });
 
-public async delete (req: Request, res: Response): Promise<Response> {
+routerAuth.delete('/delete/:id', async (req, res) => {
     try {
-        ContractServiceImpl.setRepository();
-        const contract = await ContractServiceImpl.findByIdAndRemove(req.params.id);
+        const contract = await contractService.findByIdAndRemove(req.params.id);
         if (!contract)
             return res.status(400).send({ error: { message: "Contrato não encontrado!" } });
         res.status(200).send("Sucesso ao deletar contrato!");
@@ -71,10 +69,9 @@ public async delete (req: Request, res: Response): Promise<Response> {
     }
 });
 
-public async update (req: Request, res: Response): Promise<Response> {
+routerAuth.patch('/update/:id', async (req, res) => {
     try {
-        ContractServiceImpl.setRepository();
-        let { status, contract } = await ContractServiceImpl.findByIdAndUpdate(req, { new: true, runValidators: true });
+        let { status, contract } = await contractService.findByIdAndUpdate(req.params.id, req.body, req.userId, { new: true, runValidators: true });
         if (contract)
             res.status(status).send({ contract });
         else
@@ -89,6 +86,5 @@ public async update (req: Request, res: Response): Promise<Response> {
         });
     }
 });
-}
 
-export default new  ContractController()
+export default app.use('/contract', routerAuth);

@@ -1,11 +1,11 @@
-import UserService from '../services/personService'
+import PersonService from '@services/PersonService';
+import app from 'app/app';
+import { routerAuth } from '@configs/router/routes';
+const personService = PersonService.getInstance();
 
-class PersonController {
-
-public async create (req: Request, res: Response): Promise<Response> {
+routerAuth.post('/create', async (req, res) => {
     try {
-        PersonServiceImpl.setRepository();
-        let { status, person } = await PersonServiceImpl.create(req);
+        let { status, person } = await personService.create(req.body, req.userId);
         res.status(status).send({ person });
     } catch (error) {
         return res.status(400).send({
@@ -18,10 +18,9 @@ public async create (req: Request, res: Response): Promise<Response> {
     }
 });
 
-public async list (req: Request, res: Response): Promise<Response> {
+routerAuth.get('/list', async (req, res) => {
     try {
-        PersonServiceImpl.setRepository();
-        const people = await PersonServiceImpl.findAllPopulateRelations(["crBy"]);
+        const people = await personService.findAllPopulateRelations(["crBy"]);
         if (!people)
             return res.status(400).send({ error: { message: "Pessoas não encontradas!" } });
         return res.status(200).send(people);
@@ -36,10 +35,9 @@ public async list (req: Request, res: Response): Promise<Response> {
     }
 });
 
-public async show (req: Request, res: Response): Promise<Response> {
+routerAuth.get('/show/:id', async (req, res) => {
     try {
-        PersonServiceImpl.setRepository();
-        const person = await PersonServiceImpl.findByIdPopulateRelations(req.params.id, ["crBy"]);
+        const person = await personService.findByIdPopulateRelations(req.params.id, ["crBy"]);
         if (!person)
             return res.status(400).send({ error: { message: "Pessoa não encontrada!" } });
         res.status(200).send(person);
@@ -54,10 +52,9 @@ public async show (req: Request, res: Response): Promise<Response> {
     }
 });
 
-public async delete (req: Request, res: Response): Promise<Response> {
+routerAuth.delete('/delete/:id', async (req, res) => {
     try {
-        PersonServiceImpl.setRepository();
-        const person = await PersonServiceImpl.findByIdAndRemove(req.params.id);
+        const person = await personService.findByIdAndRemove(req.params.id);
         if (!person)
             return res.status(400).send({ error: { message: "Pessoa não encontrada!" } });
         res.status(200).send("Sucesso ao deletar pessoa!");
@@ -72,10 +69,9 @@ public async delete (req: Request, res: Response): Promise<Response> {
     }
 });
 
-public async update (req: Request, res: Response): Promise<Response> {
+routerAuth.patch('/update/:id', async (req, res) => {
     try {
-        PersonServiceImpl.setRepository();
-        let { status, person } = await PersonServiceImpl.findByIdAndUpdate(req, { new: true, runValidators: true });
+        let { status, person } = await personService.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
         if (person)
             res.status(status).send({ person });
         else
@@ -90,6 +86,5 @@ public async update (req: Request, res: Response): Promise<Response> {
         });
     }
 });
-}
 
-export default new  PersonController()
+export default app.use('/person', routerAuth);

@@ -1,50 +1,5 @@
-import Mongoose, { Document, Schema } from "mongoose";
-import { UserInterface } from "./UserModel";
-
-export interface PersonInterface extends Document {
-  typeVal: string;
-  fName: string;
-  lName: string;
-  birth: string;
-  mother: string;
-  father: string;
-  email: string;
-  rent: Number;
-  docs: [
-    {
-      typeVal: string;
-      num: string;
-      send: Date;
-      due: Date;
-      files: [
-        {
-          name: string;
-          path: string;
-        }
-      ];
-    }
-  ];
-  addresses: [
-    {
-      typeVal: string;
-      street: string;
-      district: string;
-      city: string;
-      state: string;
-      num: string;
-      cep: string;
-      compl: string;
-    }
-  ];
-  phones: [
-    {
-      typeVal: string;
-      ddd: string;
-      num: string;
-    }
-  ];
-  crBy: UserInterface;
-};
+import { Schema, model } from "mongoose";
+import { PersonInterface } from "@interfaces/PersonInterface";
 
 const personSchema = new Schema(
   {
@@ -166,4 +121,4 @@ const personSchema = new Schema(
   { timestamps: true }
 );
 
-export default Mongoose.model<PersonInterface>("Person", personSchema);
+export default model<PersonInterface>("Person", personSchema);

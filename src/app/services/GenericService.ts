@@ -2,6 +2,7 @@ import GenericRepository from "@repositories/GenericRepository";
 import { Document } from "mongoose";
 
 abstract class GenericService {
+
   public genericRepository: GenericRepository;
 
   protected constructor(repository: GenericRepository) {
@@ -16,7 +17,7 @@ abstract class GenericService {
     return await this.genericRepository.findAll();
   }
 
-  public async findAllPopulateRelations(relations: [string]) {
+  public async findAllPopulateRelations(relations: string[]) {
     return await this.genericRepository.findAllPopulateRelations(relations);
   }
 
@@ -24,7 +25,7 @@ abstract class GenericService {
     return await this.genericRepository.findById(id);
   }
 
-  public async findByIdPopulateRelations(id: string, relations: [string]) {
+  public async findByIdPopulateRelations(id: string, relations: string[]) {
     return await this.genericRepository.findByIdPopulateRelations(id, relations);
   }
 
@@ -36,9 +37,10 @@ abstract class GenericService {
     return await this.genericRepository.remove(id);
   }
 
-  public async updateOne(id: string, obj: Document, actionsJson: JSON) {
+  public async updateOne(id: string, obj: Document, actionsJson: {}) {
     return await this.genericRepository.updateOne(id, obj, actionsJson);
   }
+
 }
 
 export default GenericService;

@@ -18,6 +18,7 @@
     "typeRoots": ["node_modules/@types", "src/@types"],
     "paths": {
       "@models/*": ["app/models/*"],
+      "@interfaces/*": ["app/interfaces/*"],
       "@controllers/*": ["app/controllers/*"],
       "@services/*": ["app/services/*"],
       "@repositories/*": ["app/repositories/*"],
@@ -26,5 +27,6 @@
       "@security/*": ["security/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["node_modules", "data"]
 }

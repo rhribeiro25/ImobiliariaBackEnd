@@ -1,26 +1,5 @@
-import Mongoose, { Document, Schema } from "mongoose";
-
-export interface UserInterface extends Document {
-  typeVal: string;
-  fName: string;
-  lName: string;
-  birth?: string;
-  email: string;
-  pass: string;
-  resetToken?: string;
-  resetExpires?: string;
-  image: {
-    name: string;
-    path: string;
-  };
-  phones: [
-    {
-      typeVal: string;
-      ddd: string;
-      num: string;
-    }
-  ];
-};
+import { Schema, model } from "mongoose";
+import { UserInterface } from "@interfaces/UserInterface";
 
 const UserSchema = new Schema(
   {
@@ -65,7 +44,7 @@ const UserSchema = new Schema(
       select: false,
     },
     resetExpires: {
-      type: String,
+      type: Date,
       select: false,
     },
     phones: [
@@ -93,4 +72,15 @@ UserSchema.methods.fullName = function (): string {
   return this.fName + " " + this.lName;
 };
 
-export default Mongoose.model<UserInterface>("User", UserSchema);
+UserSchema.methods.constructor = function (resetToken: string, resetExpires: Date): Schema {
+  this.resetToken = resetToken;
+  this.resetExpires = resetExpires;
+  return UserSchema;
+};
+
+UserSchema.methods.constructor = function (pass: string): Schema {
+  this.pass = pass;
+  return UserSchema;
+};
+
+export default model<UserInterface>("User", UserSchema);

@@ -1,6 +1,5 @@
 import Mongoose from 'mongoose'
-import User from '@Models/UserModel'
-import UserController from '@Controllers/UserController'
+import UserModel from '@models/UserModel';
 
 describe("User", () => {
     beforeAll(async () => {
@@ -10,7 +9,7 @@ describe("User", () => {
 
     });
     beforeEach(async () => {
-        await User.deleteMany({});
+        await UserModel.deleteMany({});
     });
 
 });

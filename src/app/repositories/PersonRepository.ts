@@ -7,7 +7,7 @@ class PersonRepository extends GenericRepository {
         super(schema);
     }
 
-    findByDoc = async function (doc: string) {
+    public async findByDoc (doc: string) {
         return await super.mongooseSchema.findOne({ "docs.num": doc });
     }
 
