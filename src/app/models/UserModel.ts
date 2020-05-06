@@ -1,12 +1,12 @@
-import { Schema, model } from "mongoose";
-import { UserInterface } from "@interfaces/UserInterface";
+import { Schema, model } from 'mongoose';
+import { UserInterface } from '@interfaces/UserInterface';
 
 const UserSchema = new Schema(
   {
     typeVal: {
       type: String,
       required: true,
-      enum: ["USER", "ADMIN", "BROKER"],
+      enum: ['USER', 'ADMIN', 'BROKER'],
     },
     fName: {
       type: String,
@@ -52,7 +52,7 @@ const UserSchema = new Schema(
         typeVal: {
           type: String,
           required: true,
-          enum: ["CELLPHONE", "TELEPHONE", "FAX"],
+          enum: ['CELLPHONE', 'TELEPHONE', 'FAX'],
         },
         ddd: {
           type: String,
@@ -65,22 +65,11 @@ const UserSchema = new Schema(
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 UserSchema.methods.fullName = function (): string {
-  return this.fName + " " + this.lName;
+  return this.fName + ' ' + this.lName;
 };
 
-UserSchema.methods.constructor = function (resetToken: string, resetExpires: Date): Schema {
-  this.resetToken = resetToken;
-  this.resetExpires = resetExpires;
-  return UserSchema;
-};
-
-UserSchema.methods.constructor = function (pass: string): Schema {
-  this.pass = pass;
-  return UserSchema;
-};
-
-export default model<UserInterface>("User", UserSchema);
+export default model<UserInterface>('User', UserSchema);

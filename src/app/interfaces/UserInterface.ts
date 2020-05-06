@@ -1,6 +1,6 @@
-import { ImageInterface } from "./ImageInterface";
-import { PhoneInterface } from "./PhoneInterface";
-import { Document } from "mongoose";
+import { Document } from 'mongoose';
+import { ImageInterface } from './ImageInterface';
+import { PhoneInterface } from './PhoneInterface';
 
 export interface UserInterface extends Document {
   typeVal: string;
@@ -13,4 +13,4 @@ export interface UserInterface extends Document {
   resetExpires?: Date;
   image: ImageInterface;
   phones: [PhoneInterface];
-};
+}

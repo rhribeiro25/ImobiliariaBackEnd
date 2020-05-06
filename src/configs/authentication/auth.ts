@@ -1,3 +1,0 @@
-export default {
-    "secret": "06af1839132ec32f3b6e5691f2793f71"
-};

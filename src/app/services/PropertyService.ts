@@ -1,22 +1,21 @@
-import GenericService from './GenericService'
-import PropertyRepository from '@repositories/PropertyRepository';
-import PropertyModel from '@models/PropertyModel';
+import GenericService from './GenericService';
 import { PropertyInterface } from '@interfaces/PropertyInterface';
+import PropertyRepository from '@app/repositories/PropertyRepository';
 
 class PropertyService extends GenericService {
-  
   private static instance: PropertyService;
-  
+  private propertyRepository = PropertyRepository.getInstance();
+
   constructor() {
-    super(new PropertyRepository(PropertyModel));
+    super(PropertyRepository.getInstance());
   }
 
   public async create(newProperty: PropertyInterface, userId: string) {
-    return await super.genericRepository.create(newProperty, userId);
+    return await this.propertyRepository.create(newProperty, userId);
   }
 
   public async findByIdAndUpdate(id: string, newProperty: PropertyInterface, actionsJson: {}) {
-    return await super.genericRepository.findByIdAndUpdate(id, newProperty, actionsJson);
+    return await this.propertyRepository.findByIdAndUpdate(id, newProperty, actionsJson);
   }
 
   public static getInstance(): PropertyService {

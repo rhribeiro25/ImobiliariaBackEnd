@@ -1,20 +1,25 @@
-import  GenericRepository from  './GenericRepository';
-import { Model, Document } from 'mongoose';
+import GenericRepository from './GenericRepository';
 import { UserInterface } from '@interfaces/UserInterface';
+import UserModel from '@app/models/UserModel';
 
 class UserRepository extends GenericRepository {
+  private static instance: UserRepository;
 
-    constructor (schema: Model<Document>) {
-        super(schema);
-    }
+  public async create(newUser: UserInterface) {
+    return await GenericRepository.mongooseSchema.create(newUser);
+  }
 
-    public async create (newUser: UserInterface) {
-        return await super.mongooseSchema.create(newUser);
-    }
+  public async findByMail(email: string, selectAttributes: string) {
+    return await GenericRepository.mongooseSchema.findOne({ email }).select(selectAttributes);
+  }
 
-    public async findByMail (email: string, selectAttributes: string) {
-        return await super.mongooseSchema.findOne({ email }).select(selectAttributes);
+  public static getInstance(): UserRepository {
+    if (!UserRepository.instance) {
+      UserRepository.instance = new UserRepository();
     }
+    GenericRepository.setSchema(UserModel);
+    return UserRepository.instance;
+  }
 }
 
 export default UserRepository;

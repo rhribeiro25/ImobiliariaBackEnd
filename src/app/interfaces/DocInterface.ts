@@ -7,6 +7,6 @@ export interface DocInterface extends Document {
     {
       name: string;
       path: string;
-    }
+    },
   ];
 }

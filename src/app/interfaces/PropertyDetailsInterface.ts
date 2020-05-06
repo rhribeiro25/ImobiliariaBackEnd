@@ -1,11 +1,11 @@
 export interface PropertyDetailsInterface extends Document {
   typeVal: string;
-  area: Boolean;
+  area: boolean;
   bedrooms: string;
   garages: string;
-  nearSubway: Boolean;
-  acceptPets: Boolean;
-  furnished: Boolean;
+  nearSubway: boolean;
+  acceptPets: boolean;
+  furnished: boolean;
   availability: string;
-  valueLocation: Number;
+  valueLocation: number;
 }

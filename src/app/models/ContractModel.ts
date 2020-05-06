@@ -1,5 +1,5 @@
-import { Schema, model } from "mongoose";
-import { ContractInterface } from "@interfaces/ContractInterface";
+import { Schema, model } from 'mongoose';
+import { ContractInterface } from '@interfaces/ContractInterface';
 
 var contractSchema = new Schema(
   {
@@ -8,32 +8,19 @@ var contractSchema = new Schema(
     people: [
       {
         type: Schema.Types.ObjectId,
-        ref: "Person",
+        ref: 'Person',
       },
     ],
     property: {
       type: Schema.Types.ObjectId,
-      ref: "Property",
+      ref: 'Property',
     },
     crBy: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-contractSchema.methods.constructor = function (started: Date, finished: Date): Schema {
-  this.started = started;
-  this.finished = finished;
-  return contractSchema;
-};
-
-contractSchema.methods.constructor = function (started: Date, finished: Date, crBy: string): Schema {
-  this.started = started;
-  this.finished = finished;
-  this.crBy = crBy;
-  return contractSchema;
-};
-
-export default model<ContractInterface>("Contract", contractSchema);
+export default model<ContractInterface>('Contract', contractSchema);

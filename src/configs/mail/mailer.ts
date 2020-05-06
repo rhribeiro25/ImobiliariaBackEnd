@@ -1,9 +1,9 @@
-import nodemailer from "nodemailer";
+import nodemailer from 'nodemailer';
+import mailConfig from './mailConfig';
 
-const { service, user, pass} = require("@config/mail/mail.ts");
-
-let transporter = nodemailer.createTransport({
-    service, auth: { user, pass }
+const transporter = nodemailer.createTransport({
+  service: mailConfig.service,
+  auth: { user: mailConfig.user, pass: mailConfig.pass },
 });
 
 export default transporter;

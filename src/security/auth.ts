@@ -1,24 +1,19 @@
-import jwt from "jsonwebtoken";
-import authConfig from "@configs/authentication/auth";
+import jwt from 'jsonwebtoken';
 
-export default (req, res, next) => {
-    const authHeader = req.headers.authorization;
-    if(!authHeader)
-        return res.status(401).send({ error: "Token não fornecido!" });
-        
-    const parts = authHeader.split(" ");
+const authSec = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).send(new Error('Token não fornecido!'));
 
-    if(!parts.length === 2)
-        return res.status(401).send({ error: "Formato de token Inválidor!"});
+  const parts: string = authHeader.split(' ');
 
-    const [ scheme, token ] = parts;
-    if(!/^Bearer$/i.test(scheme))
-        res.status(401).send({ error: "Formato de token Inválido!"});
+  if (!(parts.length === 2)) return res.status(401).send(new Error('Formato de token Inválidor!'));
 
-    jwt.verify(token, authConfig.secret, (err, decoded) => {
-        if(err) return res.status(401).send({ error: "Token Inválido!"});
-
-        req.userId = decoded.id;
-        return next();
-    });
+  const [scheme, token] = parts;
+  if (!/^Bearer$/i.test(scheme)) res.status(401).send(new Error('Formato de token Inválido!'));
+  jwt.verify(token, process.env.SECRET, (error, decoded) => {
+    if (error) return res.status(401).send(new Error('Token Inválido!'));
+    return next();
+  });
 };
+
+export const authSecutiry = authSec;

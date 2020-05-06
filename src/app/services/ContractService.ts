@@ -1,51 +1,47 @@
-import ContractRepository from "@repositories/ContractRepository";
-import PersonRepository from "@repositories/PersonRepository";
-import PropertyRepository from "@repositories/PropertyRepository";
-import PersonModel from "@models/PersonModel";
-import PropertyModel from "@models/PropertyModel";
-import GenericService from "./GenericService";
-import ContractModel from "@models/ContractModel";
-import { ContractInterface } from "@interfaces/ContractInterface";
+import ContractRepository from '@repositories/ContractRepository';
+import PersonRepository from '@repositories/PersonRepository';
+import PropertyRepository from '@repositories/PropertyRepository';
+import PersonModel from '@models/PersonModel';
+import PropertyModel from '@models/PropertyModel';
+import GenericService from './GenericService';
+import ContractModel from '@models/ContractModel';
+import { ContractInterface } from '@interfaces/ContractInterface';
 
 class ContractService extends GenericService {
-
   private static instance: ContractService;
+  private contractRepository = ContractRepository.getInstance();
 
   constructor() {
-    super(new ContractRepository(ContractModel));
+    super(ContractRepository.getInstance());
   }
 
   public async create(contract: ContractInterface, userId: string) {
     let { started, finished, people, property } = contract;
-    let newContract = ContractModel.constructor(started, finished);
-    newContract = await super.genericRepository.create(newContract, userId);
+    let newContract = ContractModel.set(started, finished);
+    newContract = await this.contractRepository.create(newContract, userId);
 
     super.setRepository(new PersonRepository(PersonModel));
     await Promise.all(
-      people.map(async (p) => {
-        let newPerson = await super.genericRepository.create(p, userId);
+      people.map(async p => {
+        let newPerson = await this.contractRepository.create(p, userId);
         newContract.people.push(newPerson._id);
-      })
+      }),
     );
 
     super.setRepository(new PropertyRepository(PropertyModel));
     property.contract = contract._id;
-    let newProperty = await super.genericRepository.create(property, userId);
+    let newProperty = await this.contractRepository.create(property, userId);
 
     super.setRepository(new ContractRepository(ContractModel));
     newContract.property = newProperty._id;
-    return await super.genericRepository.findByIdAndUpdate(
-      newContract._id,
-      newContract,
-      { new: true, runValidators: true }
-    );
+    return await this.contractRepository.findByIdAndUpdate(newContract._id, newContract, { new: true, runValidators: true });
   }
 
   public async findByIdAndUpdate(id: string, contract: ContractInterface, userId: string, actionsJson: {}) {
     let updatedContract;
     let { started, finished, people, property } = contract;
-    let existsContract = ContractModel.constructor(started, finished, userId);
-    existsContract = await super.genericRepository.findByIdAndUpdate(id, existsContract, { new: true, runValidators: true });
+    let existsContract = ContractModel.set(started, finished, userId);
+    existsContract = await this.contractRepository.findByIdAndUpdate(id, existsContract, { new: true, runValidators: true });
 
     if (!existsContract) return { status: 400, contract: existsContract };
 
@@ -53,21 +49,21 @@ class ContractService extends GenericService {
       existsContract.people = [];
       super.setRepository(new PersonRepository(PersonModel));
       await Promise.all(
-        people.map(async (p) => {
-          const updatedPerson = await super.genericRepository.create(p, userId);
+        people.map(async p => {
+          const updatedPerson = await this.contractRepository.create(p, userId);
           existsContract.people.push(updatedPerson);
-        })
+        }),
       );
     }
     if (property) {
       super.setRepository(new ContractRepository(ContractModel));
-      await super.genericRepository.findByIdAndRemove(existsContract.property._id);
+      await this.contractRepository.findByIdAndRemove(existsContract.property._id);
       property.contract = existsContract._id;
       super.setRepository(new PropertyRepository(PropertyModel));
-      let updatedProperty = await super.genericRepository.create(property, userId);
+      let updatedProperty = await this.contractRepository.create(property, userId);
       existsContract.property = updatedProperty._id;
       super.setRepository(new ContractRepository(ContractModel));
-      updatedContract = await super.genericRepository.findByIdAndUpdate(id, existsContract, actionsJson);
+      updatedContract = await this.contractRepository.findByIdAndUpdate(id, existsContract, actionsJson);
     }
     return { status: 200, contract: updatedContract };
   }

@@ -17,6 +17,7 @@
     "noImplicitAny": true,
     "typeRoots": ["node_modules/@types", "src/@types"],
     "paths": {
+      "@app/*": ["app/*"],
       "@models/*": ["app/models/*"],
       "@interfaces/*": ["app/interfaces/*"],
       "@controllers/*": ["app/controllers/*"],

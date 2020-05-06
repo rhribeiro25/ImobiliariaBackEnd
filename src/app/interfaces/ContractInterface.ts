@@ -1,7 +1,7 @@
-import { PropertyInterface } from "./PropertyInterface";
-import { UserInterface } from "./UserInterface";
-import { PersonInterface } from "./PersonInterface";
-import { Document } from "mongoose";
+import { Document } from 'mongoose';
+import { PersonInterface } from './PersonInterface';
+import { PropertyInterface } from './PropertyInterface';
+import { UserInterface } from './UserInterface';
 
 export interface ContractInterface extends Document {
   started: Date;
@@ -9,4 +9,4 @@ export interface ContractInterface extends Document {
   people: [PersonInterface];
   property: PropertyInterface;
   crBy: UserInterface;
-};
+}
